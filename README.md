@@ -35,7 +35,7 @@
 
 
 
-在`build_openwrt.sh`中，如下参数可以根据自身机器容量来修改，单位(M)。
+在`build-openwrt.sh`中，如下参数可以根据自身机器容量来修改，单位(M)。
 
 默认是 256M 和 1024M.
 
@@ -63,21 +63,21 @@ wget https://github.com/jiaopengzi/build-openwrt/raw/main/build-openwrt.sh
 执行编译
 
 ```bash
-bash build_openwrt.sh password
+bash build-openwrt.sh password
 ```
 
 明文输入密码有风险，但可以后续无人值守编译。
 
 
 
-也可以使用`bash build_openwrt.sh`,这需要根据提示输入用户密码，不能实现无人值守。
+也可以使用`bash build-openwrt.sh`,这需要根据提示输入用户密码，不能实现无人值守。
 
 
 
 执行脚本示例：
 
 ```shell
-u01@debian-11:~$ bash build_openwrt.sh passwrod
+u01@debian-11:~$ bash build-openwrt.sh passwrod
 请选择需要编译的内核版本:
  1. 内核版本 6.1
  2. 内核版本 5.15
