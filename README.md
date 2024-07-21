@@ -4,9 +4,16 @@
 
 
 感谢如下大佬的奉献
-coolsnowwolf      https://github.com/coolsnowwolf/lede
-esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
-fw876             https://github.com/fw876/helloworld.git
+
+
+
+- coolsnowwolf      https://github.com/coolsnowwolf/lede
+
+- esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
+
+- fw876             https://github.com/fw876/helloworld.git
+
+    
 
 还有很多其他大佬，感谢你们的付出。
 
