@@ -1,6 +1,4 @@
 # build-openwrt
-## 声明本项目只作为学习使用，不作为其他用途。
-
 
 
 感谢如下大佬的奉献
@@ -11,8 +9,6 @@
 
 - esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
 
-- fw876             https://github.com/fw876/helloworld.git
-
     
 
 还有很多其他大佬，感谢你们的付出。
@@ -21,7 +17,9 @@
 
 ## 1、编译环境
 
-编译环境使用 `Ubuntu 22.04 LTS` `Debian 11.10` 均可正常编译，建议使用`Ubuntu 22.04 LTS`；其他版本未测试，请酌情使用。
+编译环境使用 `Ubuntu 22.04 LTS` `Ubuntu 24.04 LTS`  `Debian 11.10` 均可正常编译，建议使用`Ubuntu 24.04 LTS`；其他版本未测试，请酌情使用
+
+**已经移除了 `python2.7`**
 
 **注意** 编译过程中会使用 `apt upgrade` 请不要使用生产中的机器来编译。
 
@@ -116,8 +114,11 @@ u01@debian-11:~$ bash build-openwrt.sh passwrod
 10. 重启后，使用 ssh 进入 openwrt 的后台，修改ip, 默认登陆IP `192.168.1.1`, 用户：`root`, 密码`password`.
 
     ```shell
-    viM /etc/config/network
+    vim /etc/config/network
     ```
 
 11. 接下来就可以愉快的上网冲浪了。
 
+
+## 声明
+本项目在遵守当地法律前提下，只作为学习使用，不作其他用途。
