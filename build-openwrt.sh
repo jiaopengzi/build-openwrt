@@ -230,7 +230,9 @@ update_env_source() {
             libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
             python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
             uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2
+            make clang llvm nano python3-pip aria2 \
+            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
+            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
     else
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
         echo "$PASSWORD" | sudo -S apt update -y
@@ -242,7 +244,9 @@ update_env_source() {
             libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
             python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
             uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2
+            make clang llvm nano python3-pip aria2 \
+            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
+            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
     fi
 
