@@ -1,20 +1,8 @@
 #!/bin/bash
 ###
 # @Date         : 2024-02-16 11:03:16
-# @Description  : 用于编译 OpenWrt 固件
-# @example1     : bash build-openwrt.sh 手动输入密码
-# @example2     : bash build-openwrt.sh password 自动输入密码
-
-# 感谢如下大佬的奉献
-# coolsnowwolf      https://github.com/coolsnowwolf/lede
-# esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
-# fw876             https://github.com/fw876/helloworld.git
-#
-# 还有很多其他大佬，感谢你们的付出。
+# @Description  : 用于在 github actions 中编译 OpenWrt 固件
 ###
-
-# 设置密码
-PASSWORD=$1
 
 # 初始版本
 KERNEL_VERSION_DEFAULT="6.6"
@@ -280,45 +268,11 @@ update_env_source() {
     timer "$start_time" "更新编译环境依赖及源码"
 }
 
-# 如果编译出错才删除临时文件
-clean_build_env() {
-    if [ ! -d "openwrt" ]; then
-        echo "======================================== 未编译过，无需清理"
-    else
-        echo "======================================== 开始清理,请耐心等待"
-
-        cd openwrt || exit
-
-        make clean
-        make dirclean
-        make distclean
-
-        # 删除临时文件
-        if [ -z "$PASSWORD" ]; then
-            sudo rm -rf tmp
-            sudo rm -rf staging_dir
-        else
-            # 根据执行脚本只输入一次密码 删除临时文件
-            echo "$PASSWORD" | sudo rm -rf tmp
-            echo "$PASSWORD" | sudo rm -rf staging_dir
-        fi
-
-        # 返回上层目录
-        cd ..
-
-        echo "======================================== 清理完毕"
-
-    fi
-}
-
 # 编译函数
 build_openwrt() {
     KERNEL_VERSION=$1
     # 记录开始时间
     start_time=$(date +%s)
-    # current_time=$(date "+%Y%m%d%H%M%S")
-    # 使用 -d 选项将 Unix 时间戳转换为 YYYYMMDDHHMMSS 格式
-    formatted_start_time=$(date -d "@$start_time" "+%Y%m%d%H%M%S")
 
     make_download "$KERNEL_VERSION"
 
@@ -344,85 +298,21 @@ build_openwrt() {
     # 删除 kernel 文件
     rm -f ./openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
 
-    # 压缩固件
-    # 判断 smb 共享目录:/mnt/resource/openwrt 是否存在
-    if [ -d "/mnt/resource/openwrt" ]; then
-        # 如果存在就复制到 smb 共享目录
-        echo "======================================== 版本:$KERNEL_VERSION 开始压缩固件,当前目录"
-        echo "$PASSWORD" | sudo -S zip -r "/mnt/resource/openwrt/openwrt_${KERNEL_VERSION}_${formatted_start_time}.zip" ./openwrt/bin/targets/x86/64
-        echo "======================================== 版本:$KERNEL_VERSION 打包完成"
-        echo "文件:/mnt/resource/openwrt/openwrt_${KERNEL_VERSION}_${formatted_start_time}.zip"
-    else
-        # 如果不存在就在当前目录
-        echo "======================================== 版本:$KERNEL_VERSION 开始压缩固件,当前目录"
-        zip -r "openwrt_${KERNEL_VERSION}_${formatted_start_time}.zip" ./openwrt/bin/targets/x86/64
-        echo "======================================== 版本:$KERNEL_VERSION 打包完成"
-        echo "文件:openwrt_${KERNEL_VERSION}_${formatted_start_time}.zip"
-    fi
+    # 删除 packages 文件夹
+    rm -rf ./openwrt/bin/targets/x86/64/packages
+
     # 计算所用时间并输出
     timer "$start_time" "版本:$KERNEL_VERSION 编译"
 }
 
-# 定义内核版本数组
-KERNEL_VERSIONS=("$KERNEL_VERSION_DEFAULT" "6.1" "5.15" "5.10" "5.4")
+# 记录开始时间
+start_time_all=$(date +%s)
 
-# 获取数组长度
-length=${#KERNEL_VERSIONS[*]}
+# 更新编译环境
+update_env_source
 
-# 提示用户输入版本
-printf "请选择需要编译的内核版本或操作:\n"
-for i in $(seq 1 "$length"); do
-    printf " %s. 内核版本 %s\n" "$i" "${KERNEL_VERSIONS[$((i - 1))]}"
-done
-printf " %s. 编译所有版本\n" "$((length + 1))"
-printf " %s. 编译失败时,清理编译环境\n" "$((length + 2))"
-printf "请选择对应序号,输入 1-%s:" "$((length + 2))"
+# 编译默认版本
+build_openwrt "$KERNEL_VERSION_DEFAULT"
 
-# 读取用户输入
-read -r version_choice
-
-# 根据用户的输入设置 KERNEL_VERSION 变量
-if ((version_choice >= 1 && version_choice <= length)); then
-    # 更新编译环境
-    update_env_source
-
-    # 编译选择的版本
-    build_openwrt "${KERNEL_VERSIONS[$((version_choice - 1))]}"
-
-    # 打印文件列表
-    echo "======================================== 编译完成文件列表:"
-    ls -l
-    exit 0
-
-elif [ "$version_choice" -eq $((length + 1)) ]; then
-    # 记录开始时间
-    start_time_all=$(date +%s)
-    # 更新编译环境
-    update_env_source
-
-    # 编译所有版本
-    for version in "${KERNEL_VERSIONS[@]}"; do
-        build_openwrt "$version"
-    done
-
-    # 打印文件列表
-    echo "======================================== 编译完成文件列表:"
-    ls -l
-
-    timer "$start_time_all" "所有版本编译"
-    exit 0
-
-elif [ "$version_choice" -eq $((length + 2)) ]; then
-    # 记录开始时间
-    start_time_all=$(date +%s)
-
-    # 清理编译环境
-    clean_build_env
-
-    timer "$start_time_all" "清理编译环境"
-    exit 0
-
-else
-    echo "无效的选择，退出."
-    exit 1
-fi
+timer "$start_time_all" "编译"
+exit 0

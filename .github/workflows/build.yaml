@@ -1,0 +1,41 @@
+###
+# @Date         : 2024-02-16 11:03:16
+# @Description  : 用于在 github actions 中编译 OpenWrt 固件
+###
+
+name: Build OpenWrt
+
+on:
+  workflow_dispatch:
+    # 手动触发工作流
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 使用 ubuntu-latest 系统
+
+    steps:
+      - name: 1. 检出仓库
+        uses: actions/checkout@v2
+        # 使用 actions/checkout@v2 操作检出仓库代码
+
+      - name: 2. 安装 bash
+        run: sudo apt-get install -y bash
+        # 安装 bash
+
+      - name: 3. 运行 build-openwrt-online.sh 脚本
+        run: bash build-openwrt-online.sh
+        # 运行 build-openwrt-online.sh 脚本
+
+      - name: 4. 归档构建产物
+        run: |
+          zip -r openwrt_bin.zip ./openwrt/bin/targets/x86/64
+        shell: bash
+        # 将构建产物打包成 zip 文件
+
+      - name: 5. 上传构建产物
+        uses: actions/upload-artifact@v2
+        with:
+          name: openwrt_bin
+          path: openwrt_bin.zip
+        # 上传构建产物到 GitHub Actions
