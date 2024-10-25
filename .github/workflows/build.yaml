@@ -34,7 +34,7 @@ jobs:
         # 将构建产物打包成 zip 文件
 
       - name: 5. 上传构建产物
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: openwrt_bin
           path: openwrt_bin.zip
