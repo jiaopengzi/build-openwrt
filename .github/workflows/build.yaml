@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2024-10-26 09:47:21
+# @BuildDate    : 2024-10-26 11:45:53
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -11,14 +11,16 @@ name: Build OpenWrt
 on:
   push:
     branches:
-      - master
       - main
+    paths:
+      # 当 main 分支下的 .github/workflows/build.yaml 文件发生变化时触发
+      - .github/workflows/build.yaml
 
   workflow_dispatch:
     # 手动触发
 
 concurrency:
-  group: build-openwrt-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   # 限制并发构建，防止同时构建多个
   cancel-in-progress: true
 
@@ -30,36 +32,13 @@ jobs:
       - name: 1. 检出仓库
         uses: actions/checkout@v4
 
-      - name: 2. 清理磁盘空间
-        run: |
-          sudo rm -rf \
-            /usr/share/dotnet \
-            /usr/local/lib/android \
-            /opt/ghc \
-            /etc/mysql \
-            /etc/php
-          sudo apt clean 2>/dev/null
-          sudo rm -rf /var/lib/apt/lists/* 2>/dev/null
-          echo "======================================== 磁盘空间清理完成,查看当前磁盘空间:"
-          df -h
-
-      - name: 3. 运行 build-openwrt-online.sh 脚本
+      - name: 2. 运行 build-openwrt-online.sh 脚本
         run: |
           chmod +x build-openwrt-online.sh
           ./build-openwrt-online.sh
 
-      - name: 4. 打包构建产物
-        run: |
-          zip -r openwrt_bin.zip ./openwrt/bin/targets/x86/64
-        shell: bash
-
-      - name: 5. 编译完成后,查看当前磁盘空间
-        run: |
-          echo "======================================== 编译完成后,查看当前磁盘空间:"
-          df -h
-
-      - name: 6. 上传压缩包到 GitHub Actions
+      - name: 3. 上传压缩包到 GitHub Actions
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt_bin
-          path: openwrt_bin.zip
+          name: openwrt-x86-64
+          path: ./openwrt/bin/targets/x86/64
