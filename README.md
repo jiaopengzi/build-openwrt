@@ -106,6 +106,19 @@ u01@debian-11:~$ ./build-openwrt.sh
 
 
 
+线上编译默认版本是`6.6`，如果需要修改可以修改 `build-openwrt-online.sh` 如下内容：
+
+```
+# 可选版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
+KERNEL_VERSION_DEFAULT="6.6"
+```
+
+
+
+**注意：`build-openwrt-online.sh` 不要使用在本地环境，会破坏本地环境。**
+
+
+
 ## 三、编译后安装固件
 
 1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.1_xxx.zip`
