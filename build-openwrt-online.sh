@@ -196,29 +196,152 @@ EOF
     timer "$start_time" "版本:$KERNEL_VERSION 下载dl库"
 }
 
+# 释放存储空间
+free_up_storage_space() {
+    # 停止所有docker容器
+    docker stop "$(docker ps -a -q)" 2>/dev/null
+    # 删除所有docker容器
+    docker rm "$(docker ps -a -q)" 2>/dev/null
+    # 删除所有docker镜像
+    docker rmi "$(docker images -q)" 2>/dev/null
+
+    # 删除不必要的软件包
+    sudo apt -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snapd* || true
+
+    # 删除不必要的文件和目录
+    sudo rm -rf \
+        /usr/share/dotnet \
+        /usr/local/lib/android \
+        /opt/ghc \
+        /etc/mysql \
+        /etc/php \
+        /tmp/* \
+        /var/tmp/* \
+        /home/*/.cache/* \
+        /root/.cache/* \
+        /usr/share/man/* \
+        /usr/share/doc/* \
+        /usr/share/locale/* \
+        /usr/share/zoneinfo/* \
+        /usr/share/info/* \
+        /var/lib/apt/lists/* \
+        /var/log/* \
+        /usr/lib/jvm/* \
+        /usr/lib/x86_64-linux-gnu/libLLVM* \
+        /usr/lib/x86_64-linux-gnu/libQt* \
+        /usr/lib/x86_64-linux-gnu/libmozjs* \
+        /usr/lib/x86_64-linux-gnu/libvulkan* \
+        /usr/lib/x86_64-linux-gnu/mesa* \
+        /usr/lib/x86_64-linux-gnu/libwebkit2gtk* \
+        /usr/lib/x86_64-linux-gnu/libx264* \
+        /usr/lib/x86_64-linux-gnu/libx265* \
+        /usr/lib/x86_64-linux-gnu/libxvid* \
+        /usr/lib/x86_64-linux-gnu/libzstd* \
+        /usr/lib/x86_64-linux-gnu/libicu* \
+        /usr/lib/x86_64-linux-gnu/libharfbuzz* \
+        /usr/lib/x86_64-linux-gnu/libfontconfig* \
+        /usr/lib/x86_64-linux-gnu/libfreetype* \
+        /usr/lib/x86_64-linux-gnu/libgraphite2* \
+        /usr/lib/x86_64-linux-gnu/libpango* \
+        /usr/lib/x86_64-linux-gnu/libcairo* \
+        /usr/lib/x86_64-linux-gnu/libpixman* \
+        /usr/lib/x86_64-linux-gnu/libpng* \
+        /usr/lib/x86_64-linux-gnu/libjpeg* \
+        /usr/lib/x86_64-linux-gnu/libsndfile* \
+        /usr/lib/x86_64-linux-gnu/libvorbis* \
+        /usr/lib/x86_64-linux-gnu/libogg* \
+        /usr/lib/x86_64-linux-gnu/libflac* \
+        /usr.lib/x86_64-linux-gnu/libspeex* \
+        /usr.lib/x86_64-linux-gnu/libopus* \
+        /usr.lib/x86_64-linux-gnu/libtheora* \
+        /usr.lib/x86_64-linux-gnu/libavcodec* \
+        /usr.lib/x86_64-linux-gnu/libavutil* \
+        /usr.lib/x86_64-linux-gnu/libavformat* \
+        /usr.lib/x86_64-linux-gnu/libavfilter* \
+        /usr.lib/x86_64-linux-gnu/libswscale* \
+        /usr.lib/x86_64-linux-gnu/libswresample* \
+        /usr.lib/x86_64-linux-gnu/libpostproc* \
+        /usr.lib/x86_64-linux-gnu/libva* \
+        /usr.lib/x86_64-linux-gnu/libvdpau* \
+        /usr.lib/x86_64-linux-gnu/libxkbcommon* \
+        /usr.lib/x86_64-linux-gnu/libwayland* \
+        /usr.lib/x86_64-linux-gnu/libinput* \
+        /usr.lib/x86_64-linux-gnu/libwacom* \
+        /usr.lib/x86_64-linux-gnu/libmtdev* \
+        /usr.lib/x86_64-linux-gnu/libevdev* \
+        /usr.lib/x86_64-linux-gnu/libudev* \
+        /usr.lib/x86_64-linux-gnu/libsystemd* \
+        /usr.lib/x86_64-linux-gnu/libdbus* \
+        /usr.lib/x86_64-linux-gnu/libselinux* \
+        /usr.lib/x86_64-linux-gnu/libseccomp* \
+        /usr.lib/x86_64-linux-gnu/libcap* \
+        /usr.lib/x86_64-linux-gnu/libpam* \
+        /usr.lib/x86_64-linux-gnu/libaudit* \
+        /usr.lib/x86_64-linux-gnu/libcrypt* \
+        /usr.lib/x86_64-linux-gnu/libattr* \
+        /usr.lib/x86_64-linux-gnu/libacl* \
+        /usr.lib/x86_64-linux-gnu/libgmp* \
+        /usr.lib/x86_64-linux-gnu/libnettle* \
+        /usr.lib/x86_64-linux-gnu/libhogweed* \
+        /usr.lib/x86_64-linux-gnu/libp11-kit* \
+        /usr.lib/x86_64-linux-gnu/libgnutls* \
+        /usr.lib/x86_64-linux-gnu/libtasn1* \
+        /usr.lib/x86_64-linux-gnu/libidn* \
+        /usr.lib/x86_64-linux-gnu/libunistring* \
+        /usr.lib/x86_64-linux-gnu/libgcrypt* \
+        /usr.lib/x86_64-linux-gnu/libgpg-error* \
+        /usr.lib/x86_64-linux-gnu/libgssapi* \
+        /usr.lib/x86_64-linux-gnu/libkrb5* \
+        /usr.lib/x86_64-linux-gnu/libk5crypto* \
+        /usr.lib/x86_64-linux-gnu/libcom_err* \
+        /usr.lib/x86_64-linux-gnu/libss* \
+        /usr.lib/x86_64-linux-gnu/libext2fs* \
+        /usr.lib/x86_64-linux-gnu/libblkid* \
+        /usr.lib/x86_64-linux-gnu/libuuid* \
+        /usr.lib/x86_64-linux-gnu/liblzma* \
+        /usr.lib/x86_64-linux-gnu/libbz2* \
+        /usr.lib/x86_64-linux-gnu/libz* \
+        /usr.lib/x86_64-linux-gnu/liblz4* \
+        /usr.lib/x86_64-linux-gnu/liblzo2* \
+        /usr.lib/x86_64-linux-gnu/libm* \
+        /usr.lib/x86_64-linux-gnu/libpthread* \
+        /usr.lib/x86_64-linux-gnu/libdl* \
+        /usr.lib/x86_64-linux-gnu/libc* \
+        /usr.lib/x86_64-linux-gnu/libnss* \
+        /usr.lib/x86_64-linux-gnu/libresolv* \
+        /usr.lib/x86_64-linux-gnu/libnsl* \
+        /usr.lib/x86_64-linux-gnu/libutil* \
+        /usr.lib/x86_64-linux-gnu/libstdc++* \
+        /usr.lib/x86_64-linux-gnu/libgcc_s* \
+        /usr.lib/x86_64-linux-gnu/libtinfo* \
+        /usr.lib/x86_64-linux-gnu/libncurses* \
+        /usr.lib/x86_64-linux-gnu/libreadline* \
+        /usr.lib/x86_64-linux-gnu/libhistory* \
+        /usr.lib/x86_64-linux-gnu/libpanel* \
+        /usr.lib/x86_64-linux-gnu/libmenu* \
+        /usr.lib/x86_64-linux-gnu/libform* \
+        /usr.lib/x86_64-linux-gnu/libgpm* \
+        /usr.lib/x86_64-linux-gnu/libslang* \
+        /usr.lib/x86_64-linux-gnu/libncursesw* \
+        /usr.lib/x86_64-linux-gnu/libpanelw* \
+        /usr.lib/x86_64-linux-gnu/libmenuw* \
+        /usr.lib/x86_64-linux-gnu/libformw*
+
+    # 删除不必要的软件包
+    sudo apt -y autoremove --purge
+    sudo apt clean 2>/dev/null
+
+    # 清理缓存
+    sudo sync
+    sudo sysctl -w vm.drop_caches=3
+}
+
 # 更新编译环境依赖及源码
 update_env_source() {
     # 记录开始时间
     start_time=$(date +%s)
     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
     df -h
-
-    # 删除所有docker容器
-    docker rm "$(docker ps -a -q)" 2>/dev/null
-    # 删除所有docker镜像
-    docker rmi "$(docker images -q)" 2>/dev/null
-
-    # 清理磁盘空间(主要是用于github actions,不要使用在本地环境)
-    sudo rm -rf \
-        /usr/share/dotnet \
-        /usr/local/lib/android \
-        /opt/ghc \
-        /etc/mysql \
-        /etc/php
-    sudo rm -rf /var/lib/apt/lists/* 2>/dev/null
-
-    # 删除不必要的软件包
-    sudo apt -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
 
     # 每次执行手动输入密码 更新软件包 & 安装依赖
     sudo apt update -y
@@ -233,10 +356,6 @@ update_env_source() {
         make clang llvm nano python3-pip aria2 \
         bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
         libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
-
-    # 删除不必要的软件包
-    sudo apt -y autoremove --purge
-    sudo apt clean 2>/dev/null
 
     echo "======================================== 查看当前磁盘空间 下载必要依赖和磁盘空间清理完成后,"
     df -h
@@ -303,8 +422,6 @@ build_openwrt() {
     echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件前"
     df -h
 
-    # 删除必要的文件
-
     # 删除基础镜像
     rm -f ./openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
 
@@ -327,6 +444,9 @@ build_openwrt() {
 
 # 记录开始时间
 start_time_all=$(date +%s)
+
+# 释放存储空间
+free_up_storage_space
 
 # 更新编译环境
 update_env_source
