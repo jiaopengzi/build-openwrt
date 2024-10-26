@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2024-10-26 14:32:04
+# @BuildDate    : 2024-10-26 15:41:25
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -35,22 +35,7 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: 2. 缓存工具链
-        uses: klever1988/cachewrtbuild@main
-        with:
-          #是否一并缓存.ccache目录，如果你启用了ccache。这是唯一的常用参数，其他三个用于除错，一般不需要调整
-          ccache: true
-
-          #是否缓存工具链目录
-          toolchain: true
-
-          #是否跳过工具链编译
-          skip: true
-
-          #清空缓存
-          clean: false
-
-      - name: 3. 使用 jlumbroso/free-disk-space 释放磁盘空间
+      - name: 2. 使用 jlumbroso/free-disk-space 释放磁盘空间
         uses: jlumbroso/free-disk-space@main
         with:
           # this might remove tools that are actually needed,
@@ -66,12 +51,12 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - name: 4. 运行 build-openwrt-online.sh 脚本
+      - name: 3. 运行 build-openwrt-online.sh 脚本
         run: |
           chmod +x build-openwrt-online.sh
           ./build-openwrt-online.sh
 
-      - name: 5. 上传编译固件
+      - name: 4. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-x86-64
