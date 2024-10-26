@@ -4,7 +4,7 @@
 # @Description  : 用于在 github actions 中编译 OpenWrt 固件
 ###
 
-# 初始版本
+# 可选版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
 KERNEL_VERSION_DEFAULT="6.6"
 
 # 计时函数
@@ -198,55 +198,47 @@ EOF
 
 # 更新编译环境依赖及源码
 update_env_source() {
-    start_time=$(date +%s)
     # 记录开始时间
-    if [ -z "$PASSWORD" ]; then
-        # 每次执行手动输入密码 更新软件包 & 安装依赖
-        sudo apt update -y
-        sudo apt full-upgrade -y
-        sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-            git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-            libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-            libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-            python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-            uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2 \
-            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
-            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
-    else
-        # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
-        echo "$PASSWORD" | sudo -S apt update -y
-        echo "$PASSWORD" | sudo -S apt full-upgrade -y
-        echo "$PASSWORD" | sudo -S apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-            git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-            libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-            libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-            python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-            uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2 \
-            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
-            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
+    start_time=$(date +%s)
+    echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
+    df -h
+    # 清理磁盘空间(主要是用于github actions,不要使用在本地环境)
+    sudo rm -rf \
+        /usr/share/dotnet \
+        /usr/local/lib/android \
+        /opt/ghc \
+        /etc/mysql \
+        /etc/php
+    sudo apt clean 2>/dev/null
+    sudo rm -rf /var/lib/apt/lists/* 2>/dev/null
 
-    fi
+    echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后,"
+    df -h
+
+    # 每次执行手动输入密码 更新软件包 & 安装依赖
+    sudo apt update -y
+    sudo apt full-upgrade -y
+    sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+        bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
+        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
+        libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
+        libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
+        python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
+        uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
+        make clang llvm nano python3-pip aria2 \
+        bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
+        libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
     # 下载源码
     # 判断是否存在 openwrt 文件夹，不存在就 git clone 存在就 git pull
     echo "======================================== 下载源码"
-    if [ ! -d "openwrt" ]; then
 
-        git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
-        cd openwrt || exit
-        echo "======================================== git clone"
+    git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+    cd openwrt || exit
+    echo "======================================== git clone"
 
-        # 添加 ssrp 源
-        echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
-    else
-        cd openwrt || exit
-        git pull
-        echo "======================================== git pull"
-    fi
+    # 添加 ssrp 源
+    echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
 
     # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
     echo "======================================== 更新软件包"
@@ -267,6 +259,9 @@ update_env_source() {
     # 初次下载dl库
     make_download "$KERNEL_VERSION_DEFAULT"
 
+    echo "======================================== 查看当前磁盘空间 make_download 完成时"
+    df -h
+
     # 计算所用时间并输出
     timer "$start_time" "更新编译环境依赖及源码"
 }
@@ -285,8 +280,6 @@ build_openwrt() {
     cd openwrt || exit
     pwd
 
-    echo "======================================== 编译前,查看当前磁盘空间:"
-    df -h
     echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
     make -j"$(nproc)"
     # make V=s -j1
@@ -298,6 +291,9 @@ build_openwrt() {
     cd ..
     pwd
 
+    echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件前"
+    df -h
+
     # 删除必要的文件
 
     # 删除基础镜像
@@ -308,6 +304,13 @@ build_openwrt() {
 
     # 删除 packages 文件夹
     rm -rf ./openwrt/bin/targets/x86/64/packages
+
+    # 清理临时文件
+    echo "======================================== 清理临时文件"
+    make clean
+
+    echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件后"
+    df -h
 
     # 计算所用时间并输出
     timer "$start_time" "版本:$KERNEL_VERSION 编译"
