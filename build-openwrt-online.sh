@@ -255,6 +255,9 @@ update_env_source() {
     echo "======================================== 安装依赖"
     ./scripts/feeds install -a
 
+    echo "======================================== 二次安装依赖,确保安装完整"
+    ./scripts/feeds install -a
+
     # 返回上层目录
     cd ..
     # 打印当前目录
