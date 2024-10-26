@@ -284,16 +284,21 @@ build_openwrt() {
     echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
     cd openwrt || exit
     pwd
+
+    echo "======================================== 编译前,查看当前磁盘空间:"
+    df -h
     echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
     make -j"$(nproc)"
     # make V=s -j1
 
     echo "======================================== 版本:$KERNEL_VERSION 编译完成"
 
-    # 压缩固件
-    echo "======================================== 版本:$KERNEL_VERSION 开始打包固件,当前目录"
+    # 返回上层目录
+    echo "======================================== 当前目录"
     cd ..
     pwd
+
+    # 删除必要的文件
 
     # 删除基础镜像
     rm -f ./openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
