@@ -202,31 +202,35 @@ free_up_storage_space() {
     df -h
 
     # 停止所有docker容器
-    docker stop "$(docker ps -a -q)" 2>/dev/null
+    docker stop "$(docker ps -a -q)"
+
     # 删除所有docker容器
-    docker rm "$(docker ps -a -q)" 2>/dev/null
+    docker rm "$(docker ps -a -q)"
+
     # 删除所有docker镜像
-    docker rmi "$(docker images -q)" 2>/dev/null
+    docker rmi "$(docker images -q)"
+    docker image prune --all --force
 
     # 删除不必要的软件包
-    sudo apt -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snapd* || true
+    sudo apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* mysql* php* mongodb* moby* snapd* || true
 
     # 删除不必要的文件和目录
-    sudo rm -rf \
-        /usr/local/lib/android \
-        /opt/ghc \
-        /etc/mysql \
-        /etc/php \
-        /usr/share/dotnet \
-        /usr/share/man \
-        /usr/share/doc \
-        /usr/share/locale \
-        /usr/share/zoneinfo \
-        /usr/share/info \
-        /tmp \
-        /var/tmp \
-        /home/*/.cache/* \
-        /root/.cache
+    sudo rm -rf /usr/local/lib/android
+    sudo rm -rf /opt/ghc
+    sudo rm -rf /etc/mysql
+    sudo rm -rf /etc/php
+    sudo rm -rf /usr/share/dotnet
+    sudo rm -rf /usr/share/man
+    sudo rm -rf /usr/share/doc
+    sudo rm -rf /usr/share/locale
+    sudo rm -rf /usr/share/zoneinfo
+    sudo rm -rf /usr/share/info
+    sudo rm -rf /tmp/*
+    sudo rm -rf /var/tmp/*
+    sudo rm -rf /home/*/.cache/*
+    sudo rm -rf /root/.cache
+    sudo rm -rf /etc/apt/sources.list.d/*
+    sudo rm -rf /opt/hostedtoolcache/CodeQL
 
     # 删除不必要的软件包
     sudo apt -y autoremove --purge
