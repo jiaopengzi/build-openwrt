@@ -202,6 +202,12 @@ update_env_source() {
     start_time=$(date +%s)
     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
     df -h
+
+    # 删除所有docker容器
+    docker rm "$(docker ps -a -q)" 2>/dev/null
+    # 删除所有docker镜像
+    docker rmi "$(docker images -q)" 2>/dev/null
+
     # 清理磁盘空间(主要是用于github actions,不要使用在本地环境)
     sudo rm -rf \
         /usr/share/dotnet \
@@ -209,11 +215,10 @@ update_env_source() {
         /opt/ghc \
         /etc/mysql \
         /etc/php
-    sudo apt clean 2>/dev/null
     sudo rm -rf /var/lib/apt/lists/* 2>/dev/null
 
-    echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后,"
-    df -h
+    # 删除不必要的软件包
+    sudo apt -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
 
     # 每次执行手动输入密码 更新软件包 & 安装依赖
     sudo apt update -y
@@ -229,13 +234,17 @@ update_env_source() {
         bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
         libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
+    # 删除不必要的软件包
+    sudo apt -y autoremove --purge
+    sudo apt clean 2>/dev/null
+
+    echo "======================================== 查看当前磁盘空间 下载必要依赖和磁盘空间清理完成后,"
+    df -h
     # 下载源码
-    # 判断是否存在 openwrt 文件夹，不存在就 git clone 存在就 git pull
     echo "======================================== 下载源码"
 
     git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
     cd openwrt || exit
-    echo "======================================== git clone"
 
     # 添加 ssrp 源
     echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
@@ -326,4 +335,3 @@ update_env_source
 build_openwrt "$KERNEL_VERSION_DEFAULT"
 
 timer "$start_time_all" "编译"
-exit 0
