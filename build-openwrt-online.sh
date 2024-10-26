@@ -310,8 +310,10 @@ build_openwrt() {
     pwd
 
     echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
-    make -j"$(nproc)"
+    # make -j"$(nproc)"
     # make V=s -j1
+    # 单线编译
+    make -j1
 
     echo "======================================== 版本:$KERNEL_VERSION 编译完成"
 
