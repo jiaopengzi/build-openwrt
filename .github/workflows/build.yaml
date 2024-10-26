@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2024-10-26 12:30:51
+# @BuildDate    : 2024-10-26 14:32:04
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -37,7 +37,7 @@ jobs:
           chmod +x build-openwrt-online.sh
           ./build-openwrt-online.sh
 
-      - name: 3. 上传压缩包到 GitHub Actions
+      - name: 3. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-x86-64
