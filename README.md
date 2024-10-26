@@ -15,7 +15,9 @@
 
 
 
-## 1、编译环境
+## 一、本地编译
+
+### 1、编译环境
 
 编译环境使用 `Ubuntu 22.04 LTS` `Ubuntu 24.04 LTS`  `Debian 11.10` 均可正常编译，建议使用`Ubuntu 24.04 LTS`；其他版本未测试，请酌情使用
 
@@ -48,50 +50,63 @@ CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 
 
 
-## 2、自动编译
+### 2、自动编译
 
 下载脚本到本地
 
-```bash
+```shell
 wget https://github.com/jiaopengzi/build-openwrt/raw/main/build-openwrt.sh
 ```
 
 
 
-执行编译
+对脚本添加执行权限，调用脚本执行编译
 
-```bash
-bash build-openwrt.sh password
+```shell
+sudo chmod +x build-openwrt.sh
+./build-openwrt.sh your-password
 ```
+
+
 
 明文输入密码有风险，但可以后续无人值守编译。
 
 
 
-也可以使用`bash build-openwrt.sh`,这需要根据提示输入用户密码，不能实现无人值守。
+也可以使用`./build-openwrt.sh`,这需要根据提示输入用户密码，不能实现无人值守。
 
 
 
 执行脚本示例：
 
 ```shell
-u01@debian-11:~$ bash build-openwrt.sh passwrod
-请选择需要编译的内核版本:
- 1. 内核版本 6.1
- 2. 内核版本 5.15
- 3. 内核版本 5.10
- 4. 内核版本 5.4
- 5. 编译所有版本
-请选择版本对应序号,输入 1-5:5
+u01@debian-11:~$ ./build-openwrt.sh 
+请选择需要编译的内核版本或操作:
+ 1. 内核版本 6.6
+ 2. 内核版本 6.1
+ 3. 内核版本 5.15
+ 4. 内核版本 5.10
+ 5. 内核版本 5.4
+ 6. 编译所有版本
+ 7. 编译失败时,清理编译环境
+请选择对应序号,输入 1-7:
 ```
 
 
 
-可以根据自己需求选择内核版本，目前我使用的是 6.1 的内核，稳定运行半年以上了。
+可以根据自己需求选择内核版本，目前我使用的是 6.6 的内核，稳定运行半年以上了。
 
 
 
-## 4、编译后安装固件
+## 二、线上 github actions 编译
+
+1. 将本仓库 fork 到自己的仓库
+2. 在 `/.github/workflows/build.yaml` 中去修改一下 `@BuildDate    : 2024-10-26 09:47:21` 中的日期，执行push后，就可以看到编译在执行了。当然也可以手动去执行 `run wokflow`。
+3. 等待一段时间后，回来可以看到编译好固件就生成了，下载下来执行后续步骤即可。
+
+
+
+## 三、编译后安装固件
 
 1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.1_xxx.zip`
 
@@ -120,5 +135,7 @@ u01@debian-11:~$ bash build-openwrt.sh passwrod
 11. 接下来就可以愉快的上网冲浪了。
 
 
+
 ## 声明
+
 本项目在遵守当地法律前提下，只作为学习使用，不作其他用途。
