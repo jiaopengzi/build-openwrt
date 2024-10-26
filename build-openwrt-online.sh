@@ -198,6 +198,8 @@ EOF
 
 # 释放存储空间
 free_up_storage_space() {
+    echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
+    df -h
     # 停止所有docker容器
     docker stop "$(docker ps -a -q)" 2>/dev/null
     # 删除所有docker容器
@@ -206,7 +208,7 @@ free_up_storage_space() {
     docker rmi "$(docker images -q)" 2>/dev/null
 
     # 删除不必要的软件包
-    sudo apt -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snapd* || true
+    sudo apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snapd* || true
 
     # 删除不必要的文件和目录
     sudo rm -rf \
@@ -328,25 +330,25 @@ free_up_storage_space() {
         /usr.lib/x86_64-linux-gnu/libformw*
 
     # 删除不必要的软件包
-    sudo apt -y autoremove --purge
-    sudo apt clean 2>/dev/null
+    sudo apt-get -y autoremove --purge
+    sudo apt-get clean 2>/dev/null
 
     # 清理缓存
     sudo sync
     sudo sysctl -w vm.drop_caches=3
+    echo "======================================== 查看当前磁盘空间 下载必要依赖和磁盘空间清理完成后,"
+    df -h
 }
 
 # 更新编译环境依赖及源码
 update_env_source() {
     # 记录开始时间
     start_time=$(date +%s)
-    echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
-    df -h
 
     # 每次执行手动输入密码 更新软件包 & 安装依赖
-    sudo apt update -y
-    sudo apt full-upgrade -y
-    sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+    sudo apt-get update -y
+    sudo apt-get full-upgrade -y
+    sudo apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
         bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
         git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
         libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
@@ -357,8 +359,6 @@ update_env_source() {
         bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
         libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
-    echo "======================================== 查看当前磁盘空间 下载必要依赖和磁盘空间清理完成后,"
-    df -h
     # 下载源码
     echo "======================================== 下载源码"
 
