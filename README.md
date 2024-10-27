@@ -101,27 +101,23 @@ u01@debian-11:~$ ./build-openwrt.sh
 ## 二、线上 github actions 编译
 
 1. 将本仓库 fork 到自己的仓库
-2. 在 `/.github/workflows/build.yaml` 中去修改一下 `@BuildDate    : 2024-10-26 09:47:21` 中的日期，执行push后，就可以看到编译在执行了。当然也可以手动去执行 `run wokflow`。
+2. 在 `./.github/workflows/build.yaml` 中去修改一下 `@BuildDate    : 2024-10-26 09:47:21` 中的日期，执行push后，就可以看到编译在执行了。当然也可以手动去执行 `run wokflow`。
 3. 等待一段时间后，回来可以看到编译好固件就生成了，下载下来执行后续步骤即可。
 
 
 
-线上编译默认版本是`6.6`，如果需要修改可以修改 `build-openwrt-online.sh` 如下内容：
+线上编译默认版本是`6.6`，如果需要修改可以修改 `./.github/workflows/build.yaml` 如下内容：
 
 ```
-# 可选版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
-KERNEL_VERSION_DEFAULT="6.6"
+KERNEL_VERSION: '6.6' # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
 ```
 
-
-
-**注意：`build-openwrt-online.sh` 不要使用在本地环境，会破坏本地环境。**
-
+对应配置文件 `x86_64.config` 可以自己自己需求修改
 
 
 ## 三、编译后安装固件
 
-1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.1_xxx.zip`
+1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.6_xxx.zip`
 
 2. 解压后cd到`./openwrt/bin/targets/x86/64/`查看编译好的固件。
 

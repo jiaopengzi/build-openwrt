@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # 在这里定义全局变量
-      KERNEL_VERSION: '6.6' # 内核版本
+      KERNEL_VERSION: '6.6' # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
       CONFIG_FILE: 'x86_64.config' # 配置文件
 
     steps:
-      - name: 磁盘空间监控
+      - name: __磁盘空间监控
         run: |
           echo "磁盘空间监控"
           echo "=============================================================================="
@@ -42,7 +42,7 @@ jobs:
 
       - name: 1. 磁盘空间优化
         # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
-        uses: 'hugoalh/disk-space-optimizer-ghaction@v0.8.1'
+        uses: 'hugoalh/disk-space-optimizer-ghaction@main'
         with:
           operate_sudo: 'True'
           general_include: '.+'
@@ -73,60 +73,7 @@ jobs:
           remove-codeql: 'true'
           remove-docker-images: 'true'
 
-      # - name: 2. 使用 jlumbroso/free-disk-space 释放磁盘空间
-      #   uses: jlumbroso/free-disk-space@main
-      #   with:
-      #     # this might remove tools that are actually needed,
-      #     # if set to "true" but frees about 6 GB
-      #     tool-cache: false
-
-      #     # all of these default to true, but feel free to set to
-      #     # "false" if necessary for your workflow
-      #     android: true
-      #     dotnet: true
-      #     haskell: true
-      #     large-packages: true
-      #     docker-images: true
-      #     swap-storage: true
-
-      # - name: 3. 再次手动释放磁盘空间
-      #   run: |
-      #     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前"
-      #     df -h
-
-      #     # 删除不必要的软件包
-      #     sudo apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* mysql* php* mongodb* moby* snapd* || true
-
-      #     # 删除不必要的文件和目录
-      #     sudo rm -rf /etc/mysql
-      #     sudo rm -rf /etc/apt/sources.list.d/*
-      #     sudo rm -rf /etc/php
-
-      #     sudo rm -rf /opt/ghc
-      #     sudo rm -rf /opt/hostedtoolcache/CodeQL
-
-      #     sudo rm -rf /usr/local/lib/android
-      #     sudo rm -rf /usr/share/dotnet
-      #     sudo rm -rf /usr/share/man
-      #     sudo rm -rf /usr/share/doc
-      #     sudo rm -rf /usr/share/locale
-      #     sudo rm -rf /usr/share/zoneinfo
-      #     sudo rm -rf /usr/share/info
-
-      #     sudo rm -rf /tmp/*
-      #     sudo rm -rf /var/tmp/*
-
-      #     sudo rm -rf /home/*/.cache/*
-      #     sudo rm -rf /root/.cache
-
-      #     sudo apt -y autoremove --purge
-      #     sudo apt-get autoclean
-      #     sudo apt-get clean
-
-      #     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后"
-      #     df -h
-
-      - name: 磁盘空间监控
+      - name: __磁盘空间监控
         run: |
           echo "磁盘空间监控"
           echo "=============================================================================="
@@ -155,13 +102,6 @@ jobs:
               make clang llvm nano python3-pip aria2 \
               bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
               libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
-
-      - name: 磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
 
       - name: 5. 下载源码
         run: |
@@ -195,13 +135,6 @@ jobs:
           clean: false
           prefix: ${{ github.workspace }}/openwrt
 
-      - name: 磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
       - name: 7. 安装编译依赖
         run: |
           echo "======================================== 安装依赖"
@@ -210,13 +143,6 @@ jobs:
 
           echo "======================================== 二次安装依赖,确保安装完整"
           ./scripts/feeds install -a
-
-      - name: 磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
 
       - name: 8. make_download
         run: |
@@ -244,21 +170,7 @@ jobs:
           echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
           make download -j"$(nproc)"
 
-      - name: 磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
-      - name: 9. 清理编译目录
-        run: |
-          echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
-          cd openwrt || exit
-          pwd
-          make clean
-
-      - name: 磁盘空间监控
+      - name: __磁盘空间监控
         run: |
           echo "磁盘空间监控"
           echo "=============================================================================="
@@ -292,11 +204,7 @@ jobs:
           # 删除 packages 文件夹
           rm -rf ./openwrt/bin/targets/x86/64/packages
 
-          # 清理临时文件
-          echo "======================================== 清理临时文件"
-          make clean
-
-      - name: 磁盘空间监控
+      - name: __磁盘空间监控
         run: |
           echo "磁盘空间监控"
           echo "=============================================================================="
