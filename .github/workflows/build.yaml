@@ -57,7 +57,7 @@ jobs:
 
       - name: 3. 再次手动释放磁盘空间
         run: |
-          echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
+          echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前"
           df -h
 
           # 删除不必要的软件包
@@ -85,10 +85,10 @@ jobs:
           sudo apt-get autoclean
           sudo apt-get clean
 
-          echo "======================================== 查看当前磁盘空间 下载必要依赖和磁盘空间清理完成后,"
+          echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后"
           df -h
 
-      - name: 4. 安装依赖
+      - name: 4. 安装环境依赖
         run: |
           sudo apt update -y
           sudo apt full-upgrade -y
@@ -103,6 +103,10 @@ jobs:
               bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
               libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
+          echo "======================================== 查看当前磁盘空间 安装依赖后"
+          df -h
+      - name: 5. 下载源码
+        run: |
           # 下载源码
           echo "======================================== 下载源码"
 
@@ -116,6 +120,10 @@ jobs:
           echo "======================================== 更新软件包"
           ./scripts/feeds update -a
 
+          echo "======================================== 查看当前磁盘空间 下载源码后"
+          df -h
+      - name: 6. 安装编译依赖
+        run: |
           echo "======================================== 安装依赖"
           ./scripts/feeds install -a
 
@@ -128,10 +136,9 @@ jobs:
           echo "======================================== 当前目录"
           pwd
 
-          echo "======================================== 查看当前磁盘空间 make_download 完成时"
+          echo "======================================== 查看当前磁盘空间 安装编译依赖后"
           df -h
-
-      - name: 5. make_download
+      - name: 7. make_download
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE ./openwrt/.config
 
@@ -162,7 +169,7 @@ jobs:
           echo "======================================== 查看当前磁盘空间 make_download完成时"
           df -h
 
-      - name: 6. 编译固件
+      - name: 8. 编译固件
         run: |
           # 编译固件 稳妥起见，建议使用单线程编译
 
@@ -200,7 +207,7 @@ jobs:
           echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件后"
           df -h
 
-      - name: 7. 上传编译固件
+      - name: 9. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-x86-64
