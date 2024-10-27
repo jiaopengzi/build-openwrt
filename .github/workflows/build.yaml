@@ -33,62 +33,115 @@ jobs:
       CONFIG_FILE: 'x86_64.config' # 配置文件
 
     steps:
-      - name: 1. 检出仓库
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+
+      - name: 1. 磁盘空间优化
+        # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
+        uses: 'hugoalh/disk-space-optimizer-ghaction@v0.8.1'
+        with:
+          operate_sudo: 'True'
+          general_include: '.+'
+          general_exclude: |-
+            ^GCC$
+            ^G\+\+$
+            Clang
+            LLVM
+          docker_include: '.+'
+          docker_prune: 'True'
+          docker_clean: 'True'
+          apt_prune: 'True'
+          apt_clean: 'True'
+          homebrew_prune: 'True'
+          homebrew_clean: 'True'
+          npm_prune: 'True'
+          npm_clean: 'True'
+          os_swap: 'True'
+
+      - name: 2. 磁盘空间释放
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 2048
+          swap-size-mb: 1
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      # - name: 2. 使用 jlumbroso/free-disk-space 释放磁盘空间
+      #   uses: jlumbroso/free-disk-space@main
+      #   with:
+      #     # this might remove tools that are actually needed,
+      #     # if set to "true" but frees about 6 GB
+      #     tool-cache: false
+
+      #     # all of these default to true, but feel free to set to
+      #     # "false" if necessary for your workflow
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     large-packages: true
+      #     docker-images: true
+      #     swap-storage: true
+
+      # - name: 3. 再次手动释放磁盘空间
+      #   run: |
+      #     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前"
+      #     df -h
+
+      #     # 删除不必要的软件包
+      #     sudo apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* mysql* php* mongodb* moby* snapd* || true
+
+      #     # 删除不必要的文件和目录
+      #     sudo rm -rf /etc/mysql
+      #     sudo rm -rf /etc/apt/sources.list.d/*
+      #     sudo rm -rf /etc/php
+
+      #     sudo rm -rf /opt/ghc
+      #     sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+      #     sudo rm -rf /usr/local/lib/android
+      #     sudo rm -rf /usr/share/dotnet
+      #     sudo rm -rf /usr/share/man
+      #     sudo rm -rf /usr/share/doc
+      #     sudo rm -rf /usr/share/locale
+      #     sudo rm -rf /usr/share/zoneinfo
+      #     sudo rm -rf /usr/share/info
+
+      #     sudo rm -rf /tmp/*
+      #     sudo rm -rf /var/tmp/*
+
+      #     sudo rm -rf /home/*/.cache/*
+      #     sudo rm -rf /root/.cache
+
+      #     sudo apt -y autoremove --purge
+      #     sudo apt-get autoclean
+      #     sudo apt-get clean
+
+      #     echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后"
+      #     df -h
+
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+
+      - name: 3. 检出仓库
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
 
-      - name: 2. 使用 jlumbroso/free-disk-space 释放磁盘空间
-        uses: jlumbroso/free-disk-space@main
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
-
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
-      - name: 3. 再次手动释放磁盘空间
-        run: |
-          echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前"
-          df -h
-
-          # 删除不必要的软件包
-          sudo apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* mysql* php* mongodb* moby* snapd* || true
-
-          # 删除不必要的文件和目录
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /etc/mysql
-          sudo rm -rf /etc/php
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/share/man
-          sudo rm -rf /usr/share/doc
-          sudo rm -rf /usr/share/locale
-          sudo rm -rf /usr/share/zoneinfo
-          sudo rm -rf /usr/share/info
-          sudo rm -rf /tmp/*
-          sudo rm -rf /var/tmp/*
-          sudo rm -rf /home/*/.cache/*
-          sudo rm -rf /root/.cache
-          sudo rm -rf /etc/apt/sources.list.d/*
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-
-          sudo apt -y autoremove --purge
-          sudo apt-get autoclean
-          sudo apt-get clean
-
-          echo "======================================== 查看当前磁盘空间 磁盘空间清理完成后"
-          df -h
-
       - name: 4. 安装环境依赖
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt update -y
           sudo apt full-upgrade -y
@@ -103,8 +156,12 @@ jobs:
               bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
               libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
 
-          echo "======================================== 查看当前磁盘空间 安装依赖后"
-          df -h
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
       - name: 5. 下载源码
         run: |
@@ -120,9 +177,6 @@ jobs:
           # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
           echo "======================================== 更新软件包"
           ./scripts/feeds update -a
-
-          echo "======================================== 查看当前磁盘空间 下载源码后"
-          df -h
 
       - name: 6. 缓存编译工具链
         # 参考：https://github.com/coolsnowwolf/lede/pull/7796
@@ -141,6 +195,13 @@ jobs:
           clean: false
           prefix: ${{ github.workspace }}/openwrt
 
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+
       - name: 7. 安装编译依赖
         run: |
           echo "======================================== 安装依赖"
@@ -150,8 +211,12 @@ jobs:
           echo "======================================== 二次安装依赖,确保安装完整"
           ./scripts/feeds install -a
 
-          echo "======================================== 查看当前磁盘空间 安装编译依赖后"
-          df -h
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
       - name: 8. make_download
         run: |
@@ -179,21 +244,32 @@ jobs:
           echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
           make download -j"$(nproc)"
 
-          echo "======================================== 查看当前磁盘空间 make_download完成时"
-          df -h
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
-      - name: 9. 编译固件
+      - name: 9. 清理编译目录
         run: |
           echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
           cd openwrt || exit
           pwd
-
-          echo "======================================== 查看当前磁盘空间 编译前清理临时文件前"
-          df -h
-          echo "======================================== 编译前清理临时文件"
           make clean
-          echo "======================================== 查看当前磁盘空间 编译前清理临时文件前"
-          df -h
+
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+
+      - name: 10. 编译固件
+        run: |
+          echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
+          cd openwrt || exit
+          pwd
 
           echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
           make -j"$(nproc)"
@@ -206,8 +282,6 @@ jobs:
           cd ..
           pwd
 
-          echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件前"
-          df -h
 
           # 删除基础镜像
           rm -f ./openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
@@ -222,10 +296,14 @@ jobs:
           echo "======================================== 清理临时文件"
           make clean
 
-          echo "======================================== 查看当前磁盘空间 编译完成,清理临时文件后"
-          df -h
+      - name: 磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
-      - name: 10. 上传编译固件
+      - name: 11. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-x86-64
