@@ -124,7 +124,24 @@ jobs:
           echo "======================================== 查看当前磁盘空间 下载源码后"
           df -h
 
-      - name: 6. 安装编译依赖
+      - name: 6. 缓存编译工具链
+        # 参考：https://github.com/coolsnowwolf/lede/pull/7796
+        uses: klever1988/cachewrtbuild@main
+        with:
+          #是否一并缓存.ccache目录，如果你启用了ccache。这是唯一的常用参数，其他三个用于除错，一般不需要调整
+          ccache: true
+
+          #是否缓存工具链目录
+          toolchain: true
+
+          #是否跳过工具链编译
+          skip: true
+
+          #清空缓存
+          clean: false
+          prefix: ${{ github.workspace }}/openwrt
+
+      - name: 7. 安装编译依赖
         run: |
           echo "======================================== 安装依赖"
           cd openwrt || exit
@@ -135,7 +152,8 @@ jobs:
 
           echo "======================================== 查看当前磁盘空间 安装编译依赖后"
           df -h
-      - name: 7. make_download
+
+      - name: 8. make_download
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE ./openwrt/.config
 
@@ -164,27 +182,8 @@ jobs:
           echo "======================================== 查看当前磁盘空间 make_download完成时"
           df -h
 
-      - name: 8. 缓存编译工具链
-        # 参考：https://github.com/coolsnowwolf/lede/pull/7796
-        uses: klever1988/cachewrtbuild@main
-        with:
-          #是否一并缓存.ccache目录，如果你启用了ccache。这是唯一的常用参数，其他三个用于除错，一般不需要调整
-          ccache: true
-
-          #是否缓存工具链目录
-          toolchain: true
-
-          #是否跳过工具链编译
-          skip: true
-
-          #清空缓存
-          clean: false
-          prefix: ${{ github.workspace }}/openwrt
-
       - name: 9. 编译固件
         run: |
-
-
           echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
           cd openwrt || exit
           pwd
