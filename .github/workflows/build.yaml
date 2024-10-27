@@ -60,16 +60,6 @@ jobs:
           echo "======================================== 查看当前磁盘空间 磁盘空间清理完成前,"
           df -h
 
-          # 停止所有docker容器
-          docker stop "$(docker ps -a -q)"
-
-          # 删除所有docker容器
-          docker rm "$(docker ps -a -q)"
-
-          # 删除所有docker镜像
-          docker rmi "$(docker images -q)"
-          docker image prune --all --force
-
           # 删除不必要的软件包
           sudo apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* mysql* php* mongodb* moby* snapd* || true
 
