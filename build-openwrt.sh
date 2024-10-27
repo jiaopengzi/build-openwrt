@@ -186,9 +186,6 @@ CONFIG_PACKAGE_docker-compose=y
 CONFIG_PACKAGE_openssh-sftp-server=y
 CONFIG_PACKAGE_vim-full=y
 
-# ttyd 终端默认不安装
-# CONFIG_PACKAGE_ttyd is not set
-# CONFIG_PACKAGE_luci-app-ttyd is not set
 EOF
 
     # defconfig
