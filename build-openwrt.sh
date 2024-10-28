@@ -183,6 +183,9 @@ CONFIG_PACKAGE_docker-compose=y
 CONFIG_PACKAGE_openssh-sftp-server=y
 CONFIG_PACKAGE_vim-full=y
 
+# 广告过滤
+CONFIG_PACKAGE_adbyby=y
+
 EOF
 
     # defconfig
