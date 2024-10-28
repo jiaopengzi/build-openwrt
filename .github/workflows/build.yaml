@@ -82,9 +82,6 @@ jobs:
 
       - name: 3. 检出仓库
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
       - name: 4. 安装环境依赖
         env:
@@ -118,24 +115,7 @@ jobs:
           echo "======================================== 更新软件包"
           ./scripts/feeds update -a
 
-      - name: 6. 缓存编译工具链
-        # 参考：https://github.com/coolsnowwolf/lede/pull/7796
-        uses: klever1988/cachewrtbuild@main
-        with:
-          #是否一并缓存.ccache目录，如果你启用了ccache。这是唯一的常用参数，其他三个用于除错，一般不需要调整
-          ccache: true
-
-          #是否缓存工具链目录
-          toolchain: true
-
-          #是否跳过工具链编译
-          skip: true
-
-          #清空缓存
-          clean: false
-          prefix: ${{ github.workspace }}/openwrt
-
-      - name: 7. 安装编译依赖
+      - name: 6. 安装编译依赖
         run: |
           echo "======================================== 安装依赖"
           cd openwrt || exit
@@ -144,7 +124,7 @@ jobs:
           echo "======================================== 二次安装依赖,确保安装完整"
           ./scripts/feeds install -a
 
-      - name: 8. make_download
+      - name: 7. make_download
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE ./openwrt/.config
 
@@ -177,7 +157,7 @@ jobs:
           df -hT
           echo "=============================================================================="
 
-      - name: 10. 编译固件
+      - name: 8. 编译固件
         run: |
           echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
           cd openwrt || exit
@@ -211,8 +191,14 @@ jobs:
           df -hT
           echo "=============================================================================="
 
-      - name: 11. 上传编译固件
+      - name: 9. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-x86-64
           path: ./openwrt/bin/targets/x86/64
+          retention-days: 3 # 设置保留天数为3天
+
+      - name: 10. 停止job
+        run: |
+          echo "======================================== 停止job"
+          exit 0
