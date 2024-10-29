@@ -6,8 +6,8 @@
 
 
 - coolsnowwolf      https://github.com/coolsnowwolf/lede
-
 - esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
+- fw876             https://github.com/fw876/helloworld
 
     
 
@@ -51,6 +51,8 @@ CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 
 
 ### 2、自动编译
+
+**注意编译全程需要全局走梯子**
 
 下载脚本到本地
 
@@ -101,7 +103,7 @@ u01@debian-11:~$ ./build-openwrt.sh
 ## 二、线上 github actions 编译
 
 1. 将本仓库 fork 到自己的仓库
-2. 在 `./.github/workflows/build.yaml` 中去修改一下 `@BuildDate    : 2024-10-26 09:47:21` 中的日期，执行push后，就可以看到编译在执行了。当然也可以手动去执行 `run wokflow`。
+2. 在 `./.github/workflows/build.yaml` 中去修改一下 `@BuildDate    : 2024-10-26 09:47:21` 中的日期，执行 push 后，就可以看到编译在执行了。当然也可以手动去执行 `run wokflow`。
 3. 等待一段时间后，回来可以看到编译好固件就生成了，下载下来执行后续步骤即可。
 
 
@@ -135,7 +137,7 @@ KERNEL_VERSION: '6.6' # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
 
 9. 使用 `DiskImage_1_6_WinAll.exe` 将编译的固件写入硬盘。
 
-10. 重启后，使用 ssh 进入 openwrt 的后台，修改ip, 默认登陆IP `192.168.1.1`, 用户：`root`, 密码`password`.
+10. 重启后，使用 ssh 进入 openwrt 的后台，修改`/etc/config/network`ip配置, 默认登陆IP `192.168.1.1`, 用户：`root`, 密码`password`.
 
     ```shell
     vim /etc/config/network
