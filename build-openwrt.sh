@@ -95,7 +95,6 @@ CONFIG_PACKAGE_ddns-scripts_nsupdate=y
 CONFIG_PACKAGE_ddns-scripts_route53-v1=y
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_htop=y
-CONFIG_PACKAGE_wget-nossl=y
 CONFIG_PACKAGE_wget-ssl=y
 CONFIG_PACKAGE_kmod-kvm-amd=y
 CONFIG_PACKAGE_kmod-kvm-intel=y
