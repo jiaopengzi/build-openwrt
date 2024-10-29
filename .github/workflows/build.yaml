@@ -105,7 +105,8 @@ jobs:
           # 下载源码
           echo "======================================== 下载源码"
 
-          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+          # git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+          git clone https://github.com/coolsnowwolf/lede -b master openwrt
           cd openwrt || exit
 
           # 退回到 2024-10-16 版本
