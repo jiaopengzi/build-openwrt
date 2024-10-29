@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2024-10-29 15:27:55
+# @BuildDate    : 2024-10-29 19:54:56
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -105,12 +105,12 @@ jobs:
           # 下载源码
           echo "======================================== 下载源码"
 
-          # git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
-          git clone https://github.com/coolsnowwolf/lede -b master openwrt
+          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+          # git clone https://github.com/coolsnowwolf/lede -b master openwrt
           cd openwrt || exit
 
           # 退回到 2024-10-16 版本
-          git checkout 21bbc6fbed2122945184500e4fdefe2598c1a1e5
+          # git checkout 21bbc6fbed2122945184500e4fdefe2598c1a1e5
 
           # 添加 ssrp 源
           echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
