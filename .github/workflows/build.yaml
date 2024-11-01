@@ -37,7 +37,7 @@ jobs:
         id: date
         run: |
           export TZ='Asia/Shanghai'
-          echo "DATETIME=$(date "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
+          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
           touch ./date.txt
 
       - name: 10. 上传编译固件
