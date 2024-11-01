@@ -37,12 +37,14 @@ jobs:
         id: date
         run: |
           TZ='Asia/Shanghai'
+          DATE=$(date "+%Y%m%d%H%M%S")
+          echo "DATE=$DATE" >> $GITHUB_ENV
           touch ./date.txt
 
       - name: 10. 上传编译固件
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt-x86-64-$(date "+%Y%m%d%H%M%S")-${{ github.run_id }}
+          name: openwrt-x86-64-${{ env.DATE }}-${{ github.run_id }}
           path: ./date.txt
           retention-days: 3 # 设置保留天数为3天
       - name: 11. 停止job
