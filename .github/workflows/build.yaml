@@ -1,10 +1,6 @@
 ###
 # @Author       : jiaopengzi
-<<<<<<< HEAD
-# @BuildDate    : 2024-11-01 10:09:42
-=======
-# @BuildDate    : 2024-10-29 19:54:56
->>>>>>> 2d7e67ec88a0281104f0f9a3aab4169a389e121b
+# @BuildDate    : 2024-11-01 10:16:49
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
