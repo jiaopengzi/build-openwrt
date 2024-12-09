@@ -203,12 +203,32 @@ EOF
 
 # 更新编译环境依赖及源码
 update_env_source() {
+
+    # 获取网卡名称
+    network_card=$(ip -o -4 route show to default | awk '{print $5}')
+    # 创建临时文件来存储 debconf 设置
+    DEBCONF_TMP=$(mktemp)
+
+    # 写入 debconf 设置到 miniupnpd 配置临时文件
+    cat <<EOF >"$DEBCONF_TMP"
+miniupnpd miniupnpd/force_igd_desc_v1 boolean false
+miniupnpd miniupnpd/iface string $network_card
+miniupnpd miniupnpd/ip6script boolean false
+miniupnpd miniupnpd/listen string
+miniupnpd miniupnpd/start_daemon boolean true
+EOF
+
     start_time=$(date +%s)
     # 记录开始时间
     if [ -z "$PASSWORD" ]; then
         # 每次执行手动输入密码 更新软件包 & 安装依赖
         sudo apt update -y
         sudo apt full-upgrade -y
+
+        # 预先配置 miniupnpd 的 debconf 设置 解决安装 miniupnpd 交互无法输入问题
+        sudo apt install debconf-utils -y
+        sudo cat "$DEBCONF_TMP" | sudo debconf-set-selections
+
         sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
             bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
             git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
@@ -223,6 +243,11 @@ update_env_source() {
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
         echo "$PASSWORD" | sudo -S apt update -y
         echo "$PASSWORD" | sudo -S apt full-upgrade -y
+
+        # 预先配置 miniupnpd 的 debconf 设置 解决安装 miniupnpd 交互无法输入问题
+        echo "$PASSWORD" | sudo -S apt install debconf-utils -y
+        echo "$PASSWORD" | sudo -S cat "$DEBCONF_TMP" | sudo -S debconf-set-selections
+
         echo "$PASSWORD" | sudo -S apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
             bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
             git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
@@ -271,6 +296,9 @@ update_env_source() {
 
     # 初次下载dl库
     make_download "$KERNEL_VERSION_DEFAULT"
+
+    # 删除临时文件
+    rm -f "$DEBCONF_TMP"
 
     # 计算所用时间并输出
     timer "$start_time" "更新编译环境依赖及源码"
