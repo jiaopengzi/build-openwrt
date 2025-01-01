@@ -219,6 +219,17 @@ miniupnpd miniupnpd/start_daemon boolean true
 EOF
 
     start_time=$(date +%s)
+
+    packages=(
+        ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
+        bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gettext gcc-multilib g++-multilib
+        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev
+        libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libpython3-dev libreadline-dev
+        libssl-dev libtool llvm lrzsz genisoimage msmtp ninja-build p7zip p7zip-full patch pkgconf python3
+        python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo
+        uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+    )
+
     # 记录开始时间
     if [ -z "$PASSWORD" ]; then
         # 每次执行手动输入密码 更新软件包 & 安装依赖
@@ -229,16 +240,7 @@ EOF
         sudo apt install debconf-utils -y
         sudo cat "$DEBCONF_TMP" | sudo debconf-set-selections
 
-        sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-            git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-            libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-            libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-            python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-            uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2 \
-            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
-            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
+        sudo apt install -y "${packages[@]}"
     else
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
         echo "$PASSWORD" | sudo -S apt update -y
@@ -248,16 +250,7 @@ EOF
         echo "$PASSWORD" | sudo -S apt install debconf-utils -y
         echo "$PASSWORD" | sudo -S cat "$DEBCONF_TMP" | sudo -S debconf-set-selections
 
-        echo "$PASSWORD" | sudo -S apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-            git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-            libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-            libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-            python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-            uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            make clang llvm nano python3-pip aria2 \
-            bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
-            libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
+        echo "$PASSWORD" | sudo -S apt install -y "${packages[@]}"
 
     fi
 
