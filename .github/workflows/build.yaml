@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2025-01-03 10:45:11
+# @BuildDate    : 2025-02-12 21:39:38
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # 在这里定义全局变量
-      KERNEL_VERSION: '6.6' # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
-      CONFIG_FILE: 'x86_64.config' # 配置文件
+      KERNEL_VERSION: "6.6" # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
+      CONFIG_FILE: "x86_64.config" # 配置文件
 
     steps:
       - name: __磁盘空间监控
@@ -44,36 +44,36 @@ jobs:
 
       - name: 1. 磁盘空间优化
         # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
-        uses: 'hugoalh/disk-space-optimizer-ghaction@main'
+        uses: "hugoalh/disk-space-optimizer-ghaction@main"
         with:
-          operate_sudo: 'True'
-          general_include: '.+'
+          operate_sudo: "True"
+          general_include: ".+"
           general_exclude: |-
             ^GCC$
             ^G\+\+$
             Clang
             LLVM
-          docker_include: '.+'
-          docker_prune: 'True'
-          docker_clean: 'True'
-          apt_prune: 'True'
-          apt_clean: 'True'
-          homebrew_prune: 'True'
-          homebrew_clean: 'True'
-          npm_prune: 'True'
-          npm_clean: 'True'
-          os_swap: 'True'
+          docker_include: ".+"
+          docker_prune: "True"
+          docker_clean: "True"
+          apt_prune: "True"
+          apt_clean: "True"
+          homebrew_prune: "True"
+          homebrew_clean: "True"
+          npm_prune: "True"
+          npm_clean: "True"
+          os_swap: "True"
 
       - name: 2. 磁盘空间释放
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 2048
           swap-size-mb: 1
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: __磁盘空间监控
         run: |
@@ -92,15 +92,12 @@ jobs:
           sudo apt update -y
           sudo apt full-upgrade -y
           sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-              bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-              git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-              libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-              libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-              python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-              uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-              make clang llvm nano python3-pip aria2 \
-              bc lm-sensors pciutils curl miniupnpd conntrack conntrackd jq liblzma-dev \
-              libpcre2-dev libpam0g-dev libkmod-dev libtirpc-dev libaio-dev libcurl4-openssl-dev libtins-dev libyaml-cpp-dev libglib2.0-dev libgpiod-dev
+               bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
+               genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
+               libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
+               libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
+               python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
+               swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
       - name: 5. 下载源码
         run: |
