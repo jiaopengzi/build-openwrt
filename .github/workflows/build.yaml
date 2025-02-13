@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2025-02-13 08:50:13
+# @BuildDate    : 2025-02-13 10:38:38
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -43,7 +43,7 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
-          # 设置日期环境变量,用于后续步骤
+          # 设置日期环境变量
           echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: 1. 磁盘空间优化
@@ -98,37 +98,41 @@ jobs:
           # 下载源码
           echo "======================================== 下载源码"
 
-          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master /mnt/openwrt
+          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+          # git clone https://github.com/coolsnowwolf/lede -b master openwrt
+          cd openwrt || exit
 
           # 退回到 2024-10-16 版本
           # git checkout 21bbc6fbed2122945184500e4fdefe2598c1a1e5
 
           # 添加 ssrp 源
-          echo "src-git ssrp https://github.com/fw876/helloworld.git" >>/mnt/openwrt/feeds.conf.default
+          echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
 
           # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
           echo "======================================== 更新软件包"
-          /mnt/openwrt/scripts/feeds update -a
+          ./scripts/feeds update -a
 
       - name: 5. 安装编译依赖
         run: |
           echo "======================================== 安装依赖"
-          /mnt/openwrt/scripts/feeds install -a
+          cd openwrt || exit
+          ./scripts/feeds install -a
 
           echo "======================================== 二次安装依赖,确保安装完整"
-          /mnt/openwrt/scripts/feeds install -a
+          ./scripts/feeds install -a
 
       - name: 6. make_download
         run: |
-          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE /mnt/openwrt/openwrt/.config
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE ./openwrt/.config
 
           # 打印当前目录
           echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
-          ls -l /mnt/openwrt
+          cd openwrt || exit
+          pwd
 
           # 指定内核版本
-          sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
-          sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
+          sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
+          sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
 
           echo "======================================== 版本:$KERNEL_VERSION 修改指定内核完成."
 
@@ -153,13 +157,18 @@ jobs:
       - name: 7. 编译固件
         run: |
           echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
-          ls -l /mnt/openwrt
+          cd openwrt || exit
+          pwd
 
           echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
           make -j"$(nproc)"
           # make V=s -j1
 
           echo "======================================== 版本:$KERNEL_VERSION 编译完成"
+
+          # 返回上层目录
+          echo "======================================== 当前目录"
+          pwd
 
           # 删除基础镜像
           rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
@@ -170,8 +179,8 @@ jobs:
           # 删除 packages 文件夹
           rm -rf /mnt/openwrt/bin/targets/x86/64/packages
 
-          # 查看编译好的文件
-          ls -l /mnt/openwrt/bin/targets/x86/64
+          # 查看编译产物
+          ls -al /mnt/openwrt/bin/targets/x86/64
 
       - name: __磁盘空间监控
         run: |
