@@ -101,101 +101,13 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
           cd openwrt || exit
 
-          # 添加 ssrp 源
-          echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
-
-          # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
-          echo "======================================== 更新软件包"
-          ./scripts/feeds update -a
-
-      - name: 5. 安装编译依赖
-        run: |
-          echo "======================================== 安装依赖"
-          cd openwrt || exit
-          ./scripts/feeds install -a
-
-          echo "======================================== 二次安装依赖,确保安装完整"
-          ./scripts/feeds install -a
-
       - name: 6. make_download
         run: |
-          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE /mnt/openwrt/.config
+          echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
+          pwd
+          ls -al
+
+          [ -e $CONFIG_FILE ] && cp $CONFIG_FILE /mnt/openwrt/.config
 
           echo "======================================== 版本:$KERNEL_VERSION 查看.config配置文件"
           cat /mnt/openwrt/.config
-
-
-          echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
-          cd openwrt || exit
-          pwd
-
-          # 指定内核版本
-          sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
-          sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
-
-          echo "======================================== 版本:$KERNEL_VERSION 修改指定内核完成."
-
-          # defconfig
-          echo "======================================== 版本:$KERNEL_VERSION make defconfig"
-          make defconfig
-
-          # 查看编译线程最大值
-          echo "======================================== 版本:$KERNEL_VERSION 下载线程数量:$(nproc)"
-
-          # 下载 dl 库
-          echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
-          make download -j"$(nproc)"
-
-      - name: __磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
-      - name: 7. 编译固件
-        run: |
-          echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
-          cd openwrt || exit
-          pwd
-
-          echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
-          make -j"$(nproc)"
-          # make V=s -j1
-
-          echo "======================================== 版本:$KERNEL_VERSION 编译完成"
-
-          # 返回上层目录
-          echo "======================================== 当前目录"
-          pwd
-
-          # 删除基础镜像
-          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
-
-          # 删除 kernel 文件
-          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
-
-          # 删除 packages 文件夹
-          rm -rf /mnt/openwrt/bin/targets/x86/64/packages
-
-          # 查看编译产物
-          ls -al /mnt/openwrt/bin/targets/x86/64
-
-      - name: __磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
-      - name: 8. 上传编译固件
-        uses: actions/upload-artifact@v4
-        with:
-          name: openwrt-x86-64-${{ env.DATETIME }}
-          path: /mnt/openwrt/bin/targets/x86/64
-          retention-days: 3 # 设置保留天数为3天
-
-      - name: 9. 停止job
-        run: |
-          echo "======================================== 停止job"
-          exit 0
