@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2025-02-13 18:11:12
+# @BuildDate    : 2025-02-13 19:15:19
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -37,34 +37,35 @@ jobs:
       CONFIG_FILE: "x86_64.config" # 配置文件
 
     steps:
-      - name: 2. 检出仓库
+      - name: __磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+          # 设置日期环境变量
+          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: 1. 检出仓库
         uses: actions/checkout@v4
 
-      - name: 确认仓库目录和文件
-        run: |
-          echo "当前工作目录: $(pwd)"
-          echo "仓库目录内容:"
-          pwd
-          echo $GITHUB_WORKSPACE
-          ls -al $GITHUB_WORKSPACE
-
-      - name: 4. 下载源码
+      - name: 3. 下载源码
         run: |
           sudo chmod -R 777 /mnt
+
           # 下载源码
           echo "======================================== 下载源码"
 
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
           cd openwrt || exit
 
-      - name: 6. make_download
+      - name: 5. make_download
         run: |
           echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
           pwd
 
-          cp /mnt/openwrt/.config /mnt/openwrt/.config
+          # 拷贝配置文件
+          cp $GITHUB_WORKSPACE/$CONFIG_FILE /mnt/openwrt/.config
 
           echo "======================================== 版本:$KERNEL_VERSION 查看.config配置文件"
-          ls -al /mnt/openwrt
-
           cat /mnt/openwrt/.config
