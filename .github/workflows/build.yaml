@@ -40,6 +40,14 @@ jobs:
       - name: 2. 检出仓库
         uses: actions/checkout@v4
 
+      - name: 确认仓库目录和文件
+        run: |
+          echo "当前工作目录: $(pwd)"
+          echo "仓库目录内容:"
+          pwd
+          echo $GITHUB_WORKSPACE
+          ls -al $GITHUB_WORKSPACE
+
       - name: 4. 下载源码
         run: |
           sudo chmod -R 777 /mnt
@@ -54,7 +62,7 @@ jobs:
           echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
           pwd
 
-          [ -e $CONFIG_FILE ] && cp $CONFIG_FILE /mnt/openwrt/.config
+          cp /mnt/openwrt/.config /mnt/openwrt/.config
 
           echo "======================================== 版本:$KERNEL_VERSION 查看.config配置文件"
           ls -al /mnt/openwrt
