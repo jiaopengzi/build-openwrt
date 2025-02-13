@@ -62,7 +62,6 @@ CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 
 CONFIG_KERNEL_BUILD_USER="jpz"
 CONFIG_GRUB_TITLE="OpenWrt Build by jiaopengzi"
-# CONFIG_GRUB_CONSOLE is not set
 
 # 编译固件输出格式
 CONFIG_GRUB_EFI_IMAGES=y
@@ -84,18 +83,19 @@ CONFIG_TARGET_IMAGES_GZIP=y
 # CONFIG_VHDX_IMAGES is not set
 
 CONFIG_PACKAGE_grub2-efi=y
-CONFIG_PACKAGE_dnsmasq_full_auth=y
-CONFIG_PACKAGE_dnsmasq_full_conntrack=y
-CONFIG_PACKAGE_dnsmasq_full_dnssec=y
-CONFIG_PACKAGE_ddns-scripts_cloudflare.com-v4=y
-CONFIG_PACKAGE_ddns-scripts_freedns_42_pl=y
-CONFIG_PACKAGE_ddns-scripts_godaddy.com-v1=y
-CONFIG_PACKAGE_ddns-scripts_no-ip_com=y
-CONFIG_PACKAGE_ddns-scripts_nsupdate=y
-CONFIG_PACKAGE_ddns-scripts_route53-v1=y
+
+CONFIG_PACKAGE_ddns-scripts=y
+CONFIG_PACKAGE_ddns-scripts-services=y
+CONFIG_PACKAGE_ddns-scripts_aliyun=y
+CONFIG_PACKAGE_ddns-scripts_dnspod=y
+CONFIG_PACKAGE_ddns-scripts-freedns=y
+CONFIG_PACKAGE_ddns-scripts-godaddy=y
+CONFIG_PACKAGE_ddns-scripts-nsupdate=y
+CONFIG_PACKAGE_ddns-scripts-route53=y
+
 CONFIG_PACKAGE_curl=y
-CONFIG_PACKAGE_htop=y
 CONFIG_PACKAGE_wget-ssl=y
+
 CONFIG_PACKAGE_kmod-kvm-amd=y
 CONFIG_PACKAGE_kmod-kvm-intel=y
 CONFIG_PACKAGE_kmod-kvm-x86=y
@@ -107,30 +107,9 @@ CONFIG_PACKAGE_kmod-sdhci=y
 CONFIG_PACKAGE_kmod-usb2=y
 CONFIG_PACKAGE_kmod-usb2-pci=y
 CONFIG_PACKAGE_kmod-usb3=y
-# CONFIG_PACKAGE_luci-theme-argon is not set
-# CONFIG_PACKAGE_luci-app-ttyd is not set
-CONFIG_PACKAGE_luci-app-frpc=y
-CONFIG_PACKAGE_luci-app-diag-core=y
+
 CONFIG_PACKAGE_upx=y
 CONFIG_PACKAGE_lsblk=y
-
-# openssl
-CONFIG_OPENSSL_WITH_CAMELLIA=y
-CONFIG_OPENSSL_WITH_COMPRESSION=y
-CONFIG_OPENSSL_WITH_DTLS=y
-CONFIG_OPENSSL_WITH_EC2M=y
-CONFIG_OPENSSL_WITH_ERROR_MESSAGES=y
-CONFIG_OPENSSL_WITH_IDEA=y
-CONFIG_OPENSSL_WITH_MDC2=y
-CONFIG_OPENSSL_WITH_RFC3779=y
-CONFIG_OPENSSL_WITH_SEED=y
-CONFIG_OPENSSL_WITH_WHIRLPOOL=y
-
-# openssl 安装
-CONFIG_PACKAGE_luci-app-openvpn=y
-CONFIG_PACKAGE_luci-app-openvpn-server=y
-CONFIG_PACKAGE_openvpn-easy-rsa=y
-CONFIG_PACKAGE_openvpn-openssl=y
 
 # ssl证书获取
 CONFIG_PACKAGE_acme=y
@@ -139,33 +118,35 @@ CONFIG_PACKAGE_acme-dnsapi=y
 CONFIG_PACKAGE_acme-notify=y
 CONFIG_PACKAGE_luci-app-acme=y
 
-# ssrp 配置
+# ssrp 配置 默认开启
 CONFIG_DEFAULT_luci-app-ssr-plus=y
 CONFIG_PACKAGE_luci-app-ssr-plus=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Client=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Libev_Client=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Server=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Libev_Server=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ChinaDNS_NG=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Hysteria=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Tuic_Client=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadow_TLS=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_IPT2Socks=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Kcptun=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_NaiveProxy=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Redsocks2=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_V2ray_Plugin=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Server=y
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan=y
 CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y
+
+# 默认不开启,可以根据实际情况开启
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Client is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Libev_Client is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Server is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ChinaDNS_NG is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Hysteria is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Tuic_Client is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadow_TLS is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_IPT2Socks is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Kcptun is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_NaiveProxy is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Redsocks2 is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_V2ray_Plugin is not set
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan is not set
 
 # 磁盘管理工具
 CONFIG_PACKAGE_luci-app-diskman=y
@@ -174,6 +155,7 @@ CONFIG_PACKAGE_luci-app-diskman_INCLUDE_lsblk=y
 CONFIG_PACKAGE_luci-app-diskman_INCLUDE_mdadm=y
 
 # docker 后台使用命令行
+CONFIG_PACKAGE_luci-lib-docker=y
 CONFIG_PACKAGE_dockerd=y
 CONFIG_PACKAGE_docker=y
 CONFIG_PACKAGE_docker-compose=y
