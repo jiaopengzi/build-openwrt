@@ -37,60 +37,8 @@ jobs:
       CONFIG_FILE: "x86_64.config" # 配置文件
 
     steps:
-      - name: __磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-          # 设置日期环境变量
-          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
-
-      - name: 1. 磁盘空间优化
-        # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
-        uses: "hugoalh/disk-space-optimizer-ghaction@main"
-        with:
-          operate_sudo: "True"
-          general_include: ".+"
-          general_exclude: |-
-            ^GCC$
-            ^G\+\+$
-            Clang
-            LLVM
-          docker_include: ".+"
-          docker_prune: "True"
-          docker_clean: "True"
-          apt_prune: "True"
-          apt_clean: "True"
-          homebrew_prune: "True"
-          homebrew_clean: "True"
-          npm_prune: "True"
-          npm_clean: "True"
-          os_swap: "True"
-
-      - name: __磁盘空间监控
-        run: |
-          echo "磁盘空间监控"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
       - name: 2. 检出仓库
         uses: actions/checkout@v4
-
-      - name: 3. 安装环境依赖
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo apt update -y
-          sudo apt full-upgrade -y
-          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-               bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
-               genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
-               libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
-               libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
-               python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
-               swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
       - name: 4. 下载源码
         run: |
@@ -105,9 +53,10 @@ jobs:
         run: |
           echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
           pwd
-          ls -al
 
           [ -e $CONFIG_FILE ] && cp $CONFIG_FILE /mnt/openwrt/.config
 
           echo "======================================== 版本:$KERNEL_VERSION 查看.config配置文件"
+          ls -al /mnt/openwrt
+
           cat /mnt/openwrt/.config
