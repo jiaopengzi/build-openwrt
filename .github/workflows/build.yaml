@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2025-02-13 08:20:18
+# @BuildDate    : 2025-02-13 08:50:13
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -35,7 +35,6 @@ jobs:
       # 在这里定义全局变量
       KERNEL_VERSION: "6.6" # 可选内核版本 6.6 | 6.1 | 5.15 | 5.10 | 5.4
       CONFIG_FILE: "x86_64.config" # 配置文件
-      DATETIME: $(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')
 
     steps:
       - name: __磁盘空间监控
@@ -44,147 +43,142 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
-      #     # 设置日期环境变量,用于后续步骤
-      #     echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
+          # 设置日期环境变量,用于后续步骤
+          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
-      # - name: 1. 磁盘空间优化
-      #   # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
-      #   uses: "hugoalh/disk-space-optimizer-ghaction@main"
-      #   with:
-      #     operate_sudo: "True"
-      #     general_include: ".+"
-      #     general_exclude: |-
-      #       ^GCC$
-      #       ^G\+\+$
-      #       Clang
-      #       LLVM
-      #     docker_include: ".+"
-      #     docker_prune: "True"
-      #     docker_clean: "True"
-      #     apt_prune: "True"
-      #     apt_clean: "True"
-      #     homebrew_prune: "True"
-      #     homebrew_clean: "True"
-      #     npm_prune: "True"
-      #     npm_clean: "True"
-      #     os_swap: "True"
+      - name: 1. 磁盘空间优化
+        # 参考:https://github.com/dzikaros/ActionsBuildOpenWRT/blob/main/.github/workflows/build-x86_64_ipv4.yml
+        uses: "hugoalh/disk-space-optimizer-ghaction@main"
+        with:
+          operate_sudo: "True"
+          general_include: ".+"
+          general_exclude: |-
+            ^GCC$
+            ^G\+\+$
+            Clang
+            LLVM
+          docker_include: ".+"
+          docker_prune: "True"
+          docker_clean: "True"
+          apt_prune: "True"
+          apt_clean: "True"
+          homebrew_prune: "True"
+          homebrew_clean: "True"
+          npm_prune: "True"
+          npm_clean: "True"
+          os_swap: "True"
 
-      # - name: __磁盘空间监控
-      #   run: |
-      #     echo "磁盘空间监控"
-      #     echo "=============================================================================="
-      #     df -hT
-      #     echo "=============================================================================="
+      - name: __磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
-      # - name: 2. 检出仓库
-      #   uses: actions/checkout@v4
+      - name: 2. 检出仓库
+        uses: actions/checkout@v4
 
-      # - name: 3. 安装环境依赖
-      #   env:
-      #     DEBIAN_FRONTEND: noninteractive
-      #   run: |
-      #     sudo apt update -y
-      #     sudo apt full-upgrade -y
-      #     sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-      #          bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
-      #          genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
-      #          libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
-      #          libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
-      #          python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
-      #          swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+      - name: 3. 安装环境依赖
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt update -y
+          sudo apt full-upgrade -y
+          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+               bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
+               genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
+               libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
+               libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
+               python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
+               swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-      # - name: 4. 下载源码
-      #   run: |
-      #     sudo chmod -R 777 /mnt
-      #     # 下载源码
-      #     echo "======================================== 下载源码"
+      - name: 4. 下载源码
+        run: |
+          sudo chmod -R 777 /mnt
+          # 下载源码
+          echo "======================================== 下载源码"
 
-      #     git clone --depth 1 https://github.com/coolsnowwolf/lede -b master /mnt/openwrt
+          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master /mnt/openwrt
 
-      #     cd /mnt/openwrt || exit
+          # 退回到 2024-10-16 版本
+          # git checkout 21bbc6fbed2122945184500e4fdefe2598c1a1e5
 
-      #     # 退回到 2024-10-16 版本
-      #     # git checkout 21bbc6fbed2122945184500e4fdefe2598c1a1e5
+          # 添加 ssrp 源
+          echo "src-git ssrp https://github.com/fw876/helloworld.git" >>/mnt/openwrt/feeds.conf.default
 
-      #     # 添加 ssrp 源
-      #     echo "src-git ssrp https://github.com/fw876/helloworld.git" >>/mnt/openwrt/feeds.conf.default
+          # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
+          echo "======================================== 更新软件包"
+          /mnt/openwrt/scripts/feeds update -a
 
-      #     # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
-      #     echo "======================================== 更新软件包"
-      #     /mnt/openwrt/scripts/feeds update -a
+      - name: 5. 安装编译依赖
+        run: |
+          echo "======================================== 安装依赖"
+          /mnt/openwrt/scripts/feeds install -a
 
-      # - name: 5. 安装编译依赖
-      #   run: |
-      #     echo "======================================== 安装依赖"
-      #     cd /mnt/openwrt || exit
-      #     /mnt/openwrt/scripts/feeds install -a
+          echo "======================================== 二次安装依赖,确保安装完整"
+          /mnt/openwrt/scripts/feeds install -a
 
-      #     echo "======================================== 二次安装依赖,确保安装完整"
-      #     /mnt/openwrt/scripts/feeds install -a
+      - name: 6. make_download
+        run: |
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE /mnt/openwrt/openwrt/.config
 
-      # - name: 6. make_download
-      #   run: |
-      #     [ -e $CONFIG_FILE ] && mv $CONFIG_FILE /mnt/openwrt/openwrt/.config
+          # 打印当前目录
+          echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
+          ls -l /mnt/openwrt
 
-      #     # 打印当前目录
-      #     echo "======================================== 版本:$KERNEL_VERSION 当前下载目录"
-      #     cd /mnt/openwrt || exit
-      #     pwd
+          # 指定内核版本
+          sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
+          sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
 
-      #     # 指定内核版本
-      #     sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
-      #     sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" /mnt/openwrt/target/linux/x86/Makefile
+          echo "======================================== 版本:$KERNEL_VERSION 修改指定内核完成."
 
-      #     echo "======================================== 版本:$KERNEL_VERSION 修改指定内核完成."
+          # defconfig
+          echo "======================================== 版本:$KERNEL_VERSION make defconfig"
+          make defconfig
 
-      #     # defconfig
-      #     echo "======================================== 版本:$KERNEL_VERSION make defconfig"
-      #     make defconfig
+          # 查看编译线程最大值
+          echo "======================================== 版本:$KERNEL_VERSION 下载线程数量:$(nproc)"
 
-      #     # 查看编译线程最大值
-      #     echo "======================================== 版本:$KERNEL_VERSION 下载线程数量:$(nproc)"
+          # 下载 dl 库
+          echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
+          make download -j"$(nproc)"
 
-      #     # 下载 dl 库
-      #     echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
-      #     make download -j"$(nproc)"
+      - name: __磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
-      # - name: __磁盘空间监控
-      #   run: |
-      #     echo "磁盘空间监控"
-      #     echo "=============================================================================="
-      #     df -hT
-      #     echo "=============================================================================="
+      - name: 7. 编译固件
+        run: |
+          echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
+          ls -l /mnt/openwrt
 
-      # - name: 7. 编译固件
-      #   run: |
-      #     echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
-      #     cd /mnt/openwrt || exit
-      #     pwd
+          echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
+          make -j"$(nproc)"
+          # make V=s -j1
 
-      #     echo "======================================== 版本:$KERNEL_VERSION 开始编译固件"
-      #     make -j"$(nproc)"
-      #     # make V=s -j1
+          echo "======================================== 版本:$KERNEL_VERSION 编译完成"
 
-      #     echo "======================================== 版本:$KERNEL_VERSION 编译完成"
+          # 删除基础镜像
+          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
 
-      #     # 查看文件
-      #     ls -l
+          # 删除 kernel 文件
+          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
 
-      #     # 删除基础镜像
-      #     rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
+          # 删除 packages 文件夹
+          rm -rf /mnt/openwrt/bin/targets/x86/64/packages
 
-      #     # 删除 kernel 文件
-      #     rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
+          # 查看编译好的文件
+          ls -l /mnt/openwrt/bin/targets/x86/64
 
-      #     # 删除 packages 文件夹
-      #     rm -rf /mnt/openwrt/bin/targets/x86/64/packages
-
-      # - name: __磁盘空间监控
-      #   run: |
-      #     echo "磁盘空间监控"
-      #     echo "=============================================================================="
-      #     df -hT
-      #     echo "=============================================================================="
+      - name: __磁盘空间监控
+        run: |
+          echo "磁盘空间监控"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
 
       - name: 8. 上传编译固件
         uses: actions/upload-artifact@v4
