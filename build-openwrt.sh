@@ -139,7 +139,8 @@ EOF
         echo "======================================== git clone"
 
         # 添加 ssrp 源
-        echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
+        # echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
+        echo "src-git ssrp https://github.com/jiaopengzi/helloworld.git" >>./feeds.conf.default
     else
         cd openwrt || exit
         git pull
