@@ -17,7 +17,7 @@
 PASSWORD=$1
 
 # 初始版本
-KERNEL_VERSION_DEFAULT="6.6"
+KERNEL_VERSION_DEFAULT="6.12"
 
 # 计时函数
 timer() {
@@ -257,7 +257,7 @@ build_openwrt() {
 }
 
 # 定义内核版本数组
-KERNEL_VERSIONS=("$KERNEL_VERSION_DEFAULT" "6.1" "5.15" "5.10" "5.4")
+KERNEL_VERSIONS=("$KERNEL_VERSION_DEFAULT" "6.6" "6.1" "5.15" "5.10" "5.4")
 
 # 获取数组长度
 length=${#KERNEL_VERSIONS[*]}
