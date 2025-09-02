@@ -84,13 +84,17 @@ update_env_source() {
     # 创建临时文件来存储 debconf 设置
     DEBCONF_TMP=$(mktemp)
 
-    # 写入 debconf 设置到 miniupnpd 配置临时文件
+    # 写入 debconf 设置 静默安装 不交互
     cat <<EOF >"$DEBCONF_TMP"
 miniupnpd miniupnpd/force_igd_desc_v1 boolean false
 miniupnpd miniupnpd/iface string $network_card
 miniupnpd miniupnpd/ip6script boolean false
 miniupnpd miniupnpd/listen string
 miniupnpd miniupnpd/start_daemon boolean true
+
+msmtp msmtp/select_configuration select /etc/msmtprc
+msmtp msmtp/use_sendmail boolean true
+msmtp msmtp/use_mail boolean false
 EOF
 
     start_time=$(date +%s)
@@ -108,25 +112,24 @@ EOF
     # 记录开始时间
     if [ -z "$PASSWORD" ]; then
         # 每次执行手动输入密码 更新软件包 & 安装依赖
-        sudo apt update -y
-        sudo apt full-upgrade -y
+        sudo DEBIAN_FRONTEND=noninteractive apt update -y
+        sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
 
-        # 预先配置 miniupnpd 的 debconf 设置 解决安装 miniupnpd 交互无法输入问题
+        # 预先配置 debconf 解决安装交互无法输入问题
         sudo apt install debconf-utils -y
         sudo cat "$DEBCONF_TMP" | sudo debconf-set-selections
 
-        sudo apt install -y "${packages[@]}"
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${packages[@]}"
     else
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
-        echo "$PASSWORD" | sudo -S apt update -y
-        echo "$PASSWORD" | sudo -S apt full-upgrade -y
+        echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt update -y
+        echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
 
-        # 预先配置 miniupnpd 的 debconf 设置 解决安装 miniupnpd 交互无法输入问题
+        # 预先配置 debconf 解决安装交互无法输入问题
         echo "$PASSWORD" | sudo -S apt install debconf-utils -y
         echo "$PASSWORD" | sudo -S cat "$DEBCONF_TMP" | sudo -S debconf-set-selections
 
-        echo "$PASSWORD" | sudo -S apt install -y "${packages[@]}"
-
+        echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt install -y "${packages[@]}"
     fi
 
     # 下载源码

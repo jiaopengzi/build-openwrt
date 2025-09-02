@@ -51,6 +51,7 @@
         "luci",
         "miniupnpd",
         "msmtp",
+        "msmtprc",
         "multilib",
         "noninteractive",
         "nsupdate",
