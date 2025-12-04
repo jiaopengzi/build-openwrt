@@ -74,8 +74,8 @@ jobs:
           cd openwrt || exit
 
           # 添加 ssrp 源
-          # echo "src-git ssrp https://github.com/fw876/helloworld.git;master" >>./feeds.conf.default
-          echo "src-git ssrp https://github.com/jiaopengzi/helloworld.git;master" >>./feeds.conf.default
+          echo "src-git ssrp https://github.com/fw876/helloworld.git;master" >>./feeds.conf.default
+          # echo "src-git ssrp https://github.com/jiaopengzi/helloworld.git;master" >>./feeds.conf.default
 
 
           # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
