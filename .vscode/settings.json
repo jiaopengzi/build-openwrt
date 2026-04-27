@@ -105,6 +105,14 @@
         "terminal.ansiYellow": "#FBA922",
         "activityBar.background": "#04342C",
         "titleBar.activeBackground": "#06493D",
-        "titleBar.activeForeground": "#ECFEFB"
+        "titleBar.activeForeground": "#ECFEFB",
+        "titleBar.inactiveBackground": "#04342C",
+        "titleBar.inactiveForeground": "#ECFEFB",
+        "statusBar.background": "#04342C",
+        "statusBar.foreground": "#ECFEFB",
+        "statusBar.debuggingBackground": "#04342C",
+        "statusBar.debuggingForeground": "#ECFEFB",
+        "statusBar.noFolderBackground": "#04342C",
+        "statusBar.noFolderForeground": "#ECFEFB"
     }
 }
