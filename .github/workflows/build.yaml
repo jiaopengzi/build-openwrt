@@ -1,6 +1,6 @@
 ###
 # @Author       : jiaopengzi
-# @BuildDate    : 2026-04-27 09:33:40
+# @BuildDate    : 2026-05-01 15:50:00
 # @FilePath     : \build-openwrt\.github\workflows\build.yaml
 # @Description  : GitHub Actions 自动构建 OpenWrt
 ###
@@ -47,7 +47,7 @@ jobs:
           echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: 1. 检出仓库
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 2. 安装环境依赖
         env:
@@ -167,7 +167,7 @@ jobs:
           echo "=============================================================================="
 
       - name: 7. 上传编译固件
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openwrt-x86-64-${{ env.DATETIME }}
           path: /mnt/openwrt/bin/targets/x86/64
