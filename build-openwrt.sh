@@ -110,7 +110,7 @@ EOF
     if [ -z "$PASSWORD" ]; then
         # 每次执行手动输入密码 更新软件包 & 安装依赖
         sudo DEBIAN_FRONTEND=noninteractive apt update -y
-        sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
+        # sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
 
         # 预先配置 debconf 解决安装交互无法输入问题
         sudo apt install debconf-utils -y
@@ -120,7 +120,7 @@ EOF
     else
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
         echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt update -y
-        echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
+        # echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
 
         # 预先配置 debconf 解决安装交互无法输入问题
         echo "$PASSWORD" | sudo -S apt install debconf-utils -y
