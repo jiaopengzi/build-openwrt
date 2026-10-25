@@ -94,11 +94,6 @@ jobs:
 
           cd openwrt || exit
 
-          echo "::group::写入 ssrp feed"
-          sed -i '1i src-git ssrp https://github.com/fw876/helloworld.git;dev' feeds.conf.default
-          echo "::endgroup::"
-
-
           # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
           echo "::group::更新 feeds"
           ./scripts/feeds update -a

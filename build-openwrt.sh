@@ -17,7 +17,8 @@
 PASSWORD=$1
 
 # 初始版本
-KERNEL_VERSION_DEFAULT="6.12"
+KERNEL_VERSION_DEFAULT="6.18"
+CONFIG_FILE="x86_64_nft.config"
 
 # 计时函数
 timer() {
@@ -49,15 +50,8 @@ make_download() {
 
     echo "======================================== 版本:$KERNEL_VERSION 修改指定内核完成."
 
-    # 删除原来的 .config 文件 自定义定制 - x86_64.config
-    echo "======================================== 版本:$KERNEL_VERSION 自定义定制 - x86_64.config"
-    rm -f .config
-    touch .config
-
-    # 从 x86_64.config 文件中读取配置
-    read -r -d '' config <../x86_64.config
-    # 将配置写入 .config 文件
-    echo "$config" >.config
+    echo "======================================== 版本:$KERNEL_VERSION 自定义定制 - $CONFIG_FILE"
+    cp "../$CONFIG_FILE" .config || exit 1
 
     # defconfig
     echo "======================================== 版本:$KERNEL_VERSION make defconfig"
@@ -70,6 +64,8 @@ make_download() {
     echo "======================================== 版本:$KERNEL_VERSION 下载dl库"
     make download -j"$(nproc)"
 
+    df -hT
+
     # 返回上层目录
     cd ..
     # 计算所用时间并输出
@@ -78,32 +74,17 @@ make_download() {
 
 # 更新编译环境依赖及源码
 update_env_source() {
-
-    # 获取网卡名称
-    network_card=$(ip -o -4 route show to default | awk '{print $5}')
-    # 创建临时文件来存储 debconf 设置
-    DEBCONF_TMP=$(mktemp)
-
-    # 写入 debconf 设置 静默安装 不交互
-    cat <<EOF >"$DEBCONF_TMP"
-miniupnpd miniupnpd/force_igd_desc_v1 boolean false
-miniupnpd miniupnpd/iface string $network_card
-miniupnpd miniupnpd/ip6script boolean false
-miniupnpd miniupnpd/listen string
-miniupnpd miniupnpd/start_daemon boolean true
-
-EOF
-
     start_time=$(date +%s)
+    df -hT
 
     packages=(
         ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
         bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext
         genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev
         libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev
-        libreadline-dev libssl-dev libtool llvm lrzsz libnsl-dev ninja-build p7zip p7zip-full patch pkgconf
+        libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf
         python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion
-        swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zip zlib1g-dev
     )
 
     # 记录开始时间
@@ -112,19 +93,11 @@ EOF
         sudo DEBIAN_FRONTEND=noninteractive apt update -y
         # sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
 
-        # 预先配置 debconf 解决安装交互无法输入问题
-        sudo apt install debconf-utils -y
-        sudo cat "$DEBCONF_TMP" | sudo debconf-set-selections
-
         sudo DEBIAN_FRONTEND=noninteractive apt install -y "${packages[@]}"
     else
         # 根据执行脚本只输入一次密码 更新软件包 & 安装依赖
         echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt update -y
         # echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
-
-        # 预先配置 debconf 解决安装交互无法输入问题
-        echo "$PASSWORD" | sudo -S apt install debconf-utils -y
-        echo "$PASSWORD" | sudo -S cat "$DEBCONF_TMP" | sudo -S debconf-set-selections
 
         echo "$PASSWORD" | sudo -S DEBIAN_FRONTEND=noninteractive apt install -y "${packages[@]}"
     fi
@@ -137,15 +110,15 @@ EOF
         git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
         cd openwrt || exit
         echo "======================================== git clone"
-
-        # 添加 ssrp 源
-        # echo "src-git ssrp https://github.com/fw876/helloworld.git" >>./feeds.conf.default
-        # echo "src-git ssrp https://github.com/jiaopengzi/helloworld.git;update-xray-core" >>./feeds.conf.default
-        sed -i '1i src-git ssrp https://github.com/fw876/helloworld.git;dev' feeds.conf.default
     else
         cd openwrt || exit
         git pull
         echo "======================================== git pull"
+    fi
+
+    sed -i '\|^src-git ssrp https://github.com/fw876/helloworld.git;dev$|d' feeds.conf.default
+    if [ -d "package/feeds/ssrp" ]; then
+        ./scripts/feeds uninstall -a
     fi
 
     # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
@@ -166,9 +139,6 @@ EOF
 
     # 初次下载dl库
     make_download "$KERNEL_VERSION_DEFAULT"
-
-    # 删除临时文件
-    rm -f "$DEBCONF_TMP"
 
     # 计算所用时间并输出
     timer "$start_time" "更新编译环境依赖及源码"
@@ -216,7 +186,7 @@ build_openwrt() {
 
     make_download "$KERNEL_VERSION"
 
-    # 编译固件 稳妥起见，使用单线程编译
+    # 使用全部可用线程编译固件
     # 打印当前目录
     echo "======================================== 版本:$KERNEL_VERSION 当前编译目录"
     cd openwrt || exit
@@ -238,6 +208,10 @@ build_openwrt() {
     # 删除 kernel 文件
     rm -f ./openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
 
+    rm -rf ./openwrt/bin/targets/x86/64/packages
+    ls -al ./openwrt/bin/targets/x86/64
+    df -hT
+
     # 压缩固件
     # 判断 smb 共享目录:/mnt/resource/openwrt 是否存在
     if [ -d "/mnt/resource/openwrt" ]; then
@@ -258,7 +232,7 @@ build_openwrt() {
 }
 
 # 定义内核版本数组
-KERNEL_VERSIONS=("$KERNEL_VERSION_DEFAULT" "6.6" "6.1" "5.15" "5.10" "5.4")
+KERNEL_VERSIONS=("$KERNEL_VERSION_DEFAULT" "6.12" "6.6" "6.1" "5.15" "5.10" "5.4")
 
 # 获取数组长度
 length=${#KERNEL_VERSIONS[*]}
