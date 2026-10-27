@@ -27,10 +27,15 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: debian:13.7
+      volumes:
+        - /mnt:/mnt
     defaults:
       run:
         # 更改工作目录
         working-directory: /mnt
+        shell: bash
     env:
       # 在这里定义全局变量
       KERNEL_VERSION: "6.18" # 可选内核版本 6.18 | 6.12 |  6.6 | 6.1 | 5.15 | 5.10 | 5.4
@@ -48,14 +53,7 @@ jobs:
           df -hT
           echo "::endgroup::"
 
-          # 设置日期环境变量
-          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
-          print_section "DATETIME 环境变量已写入"
-
-      - name: 1. 检出仓库
-        uses: actions/checkout@v6
-
-      - name: 2. 安装环境依赖
+      - name: 1. 安装环境依赖
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -65,18 +63,29 @@ jobs:
 
           print_section "安装环境依赖"
           echo "::group::APT 更新软件源"
-          sudo apt update -y
+          apt update -y
           echo "::endgroup::"
 
           echo "::group::APT 安装构建依赖"
-          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-               bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
+          apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+               bzip2 ca-certificates ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
                genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
                libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
                libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
                python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
-               swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+               swig texinfo tzdata uglifyjs upx-ucl unzip vim wget xmlto xxd zip zlib1g-dev
           echo "::endgroup::"
+
+          # 创建独立的非 root 构建用户和目录.
+          useradd --create-home --shell /bin/bash builder
+          mkdir -p /mnt/build-openwrt
+          chown builder:builder /mnt/build-openwrt
+          echo "DATETIME=$(TZ='Asia/Shanghai' date '+%Y%m%d%H%M%S')" >> "$GITHUB_ENV"
+
+      - name: 2. 检出仓库
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
 
       - name: 3. 下载源码
         run: |
@@ -84,19 +93,17 @@ jobs:
             printf '\n========== %s =========='"\n" "$1"
           }
 
-          sudo chmod -R 777 /mnt
-
           print_section "下载源码"
 
           echo "::group::克隆 LEDE 源码"
-          git clone --depth 1 https://github.com/coolsnowwolf/lede -b master openwrt
+          runuser -u builder -- git clone --depth 1 https://github.com/coolsnowwolf/lede -b master /mnt/build-openwrt/openwrt
           echo "::endgroup::"
 
-          cd openwrt || exit
+          cd /mnt/build-openwrt/openwrt || exit
 
           # 更新软件包 & 安装依赖,出现 warning 信息不影响编译
           echo "::group::更新 feeds"
-          ./scripts/feeds update -a
+          runuser -u builder -- ./scripts/feeds update -a
           echo "::endgroup::"
 
       - name: 4. 安装编译依赖
@@ -106,14 +113,14 @@ jobs:
           }
 
           print_section "安装编译依赖"
-          cd openwrt || exit
+          cd /mnt/build-openwrt/openwrt || exit
 
           echo "::group::首次安装 feeds 依赖"
-          ./scripts/feeds install -a
+          runuser -u builder -- ./scripts/feeds install -a
           echo "::endgroup::"
 
           echo "::group::二次安装 feeds 依赖"
-          ./scripts/feeds install -a
+          runuser -u builder -- ./scripts/feeds install -a
           echo "::endgroup::"
 
       - name: 5. make_download
@@ -130,24 +137,22 @@ jobs:
           pwd
 
           # 拷贝配置文件
-          cp $GITHUB_WORKSPACE/$CONFIG_FILE /mnt/openwrt/.config
+          cp "$GITHUB_WORKSPACE/$CONFIG_FILE" /mnt/build-openwrt/openwrt/.config
+          chown builder:builder /mnt/build-openwrt/openwrt/.config
 
-          # echo "======================================== 版本:$KERNEL_VERSION 查看.config配置文件"
-          # cat /mnt/openwrt/.config
-
-          cd openwrt || exit
+          cd /mnt/build-openwrt/openwrt || exit
           pwd
           echo "::endgroup::"
 
           # 指定内核版本
           echo "::group::设置内核版本"
-          sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
-          sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
+          runuser -u builder -- sed -i "s/^KERNEL_PATCHVER:=.*$/KERNEL_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
+          runuser -u builder -- sed -i "s/^KERNEL_TESTING_PATCHVER:=.*$/KERNEL_TESTING_PATCHVER:=$KERNEL_VERSION/" target/linux/x86/Makefile
           echo "::endgroup::"
 
           # defconfig
           echo "::group::生成 defconfig"
-          make defconfig
+          runuser -u builder -- make defconfig
           echo "::endgroup::"
 
           # 查看编译线程最大值
@@ -155,7 +160,7 @@ jobs:
 
           # 下载 dl 库
           echo "::group::下载 dl 库"
-          make download -j"$(nproc)"
+          runuser -u builder -- make download -j"$(nproc)"
           echo "::endgroup::"
 
       - name: __磁盘空间监控
@@ -178,14 +183,19 @@ jobs:
           print_section "编译固件"
 
           echo "::group::编译环境"
-          cd openwrt || exit
+          cd /mnt/build-openwrt/openwrt || exit
           pwd
           printf '编译线程数量: %s\n' "$(nproc)"
           echo "::endgroup::"
 
           echo "::group::执行编译"
-          make -j"$(nproc)"
-          # make V=s -j1
+          if runuser -u builder -- make -j"$(nproc)"; then
+            :
+          else
+            result=$?
+            echo "编译失败, 退出码 $result"
+            exit "$result"
+          fi
           echo "::endgroup::"
 
           # 返回上层目录
@@ -193,16 +203,16 @@ jobs:
           pwd
 
           # 删除基础镜像
-          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
+          rm -f /mnt/build-openwrt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
 
           # 删除 kernel 文件
-          rm -f /mnt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
+          rm -f /mnt/build-openwrt/openwrt/bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
 
           # 删除 packages 文件夹
-          rm -rf /mnt/openwrt/bin/targets/x86/64/packages
+          rm -rf /mnt/build-openwrt/openwrt/bin/targets/x86/64/packages
 
           # 查看编译产物
-          ls -al /mnt/openwrt/bin/targets/x86/64
+          ls -al /mnt/build-openwrt/openwrt/bin/targets/x86/64
           echo "::endgroup::"
 
       - name: __磁盘空间监控
@@ -220,7 +230,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: openwrt-x86-64-${{ env.DATETIME }}
-          path: /mnt/openwrt/bin/targets/x86/64
+          path: /mnt/build-openwrt/openwrt/bin/targets/x86/64
           retention-days: 3 # 设置保留天数为3天
 
       - name: 8. 停止job

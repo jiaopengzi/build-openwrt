@@ -1,15 +1,10 @@
 # build-openwrt
 
-
 感谢如下大佬的奉献
-
-
 
 - coolsnowwolf      https://github.com/coolsnowwolf/lede
 - esirplayground    https://github.com/esirplayground/AutoBuild-OpenWrt
 - fw876             https://github.com/fw876/helloworld
-
-    
 
 还有很多其他大佬，感谢你们的付出。
 
@@ -21,21 +16,17 @@
 
 **注意编译全程需要全局走梯子**
 
-编译环境使用 `Ubuntu 22.04 LTS` `Ubuntu 24.04 LTS`  `Debian 11.10` 均可正常编译，建议使用`Ubuntu 24.04 LTS`；其他版本未测试，请酌情使用
+本项目的本地复现及 GitHub Actions 构建环境使用 `Debian 13`。不同环境下的构建结果可能有所不同。
 
 **已经移除了 `python2.7`**
 
-**注意** 编译过程中会使用 `apt upgrade` 请不要使用生产中的机器来编译。
-
-
+**注意** 脚本会使用 `apt update` 和 `apt install` 安装构建依赖，请不要使用生产中的机器来编译。
 
 - **不要用 root 用户进行编译**
 
 - 国内用户编译前最好准备好梯子，编译机器使用全局模式。
 
 - 默认登陆IP 192.168.1.1 密码 password
-
-
 
 在`build-openwrt.sh`中，如下参数可以根据自身机器容量来修改，单位(M)。
 
@@ -46,7 +37,6 @@ CONFIG_TARGET_KERNEL_PARTSIZE=256
 CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 ```
 
-
 ### 2、自动编译
 
 下载脚本到本地
@@ -55,7 +45,6 @@ CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 wget https://github.com/jiaopengzi/build-openwrt/raw/main/build-openwrt.sh
 ```
 
-
 对脚本添加执行权限，调用脚本执行编译
 
 ```shell
@@ -63,35 +52,33 @@ sudo chmod +x build-openwrt.sh
 ./build-openwrt.sh your-password
 ```
 
-
-
 明文输入密码有风险，但可以后续无人值守编译。
 
-
-
 也可以使用`./build-openwrt.sh`,这需要根据提示输入用户密码，不能实现无人值守。
-
-
 
 执行脚本示例：
 
 ```shell
-u01@debian-11:~$ ./build-openwrt.sh 
+u01@debian-13:~$ ./build-openwrt.sh
 请选择需要编译的内核版本或操作:
- 1. 内核版本 6.12
- 2. 内核版本 6.6
- 3. 内核版本 6.1
- 4. 内核版本 5.15
- 5. 内核版本 5.10
- 6. 内核版本 5.4
- 7. 编译所有版本
- 8. 编译失败时,清理编译环境
-请选择对应序号,输入 1-8:
+ 1. 内核版本 6.18
+ 2. 内核版本 6.12
+ 3. 内核版本 6.6
+ 4. 内核版本 6.1
+ 5. 内核版本 5.15
+ 6. 内核版本 5.10
+ 7. 内核版本 5.4
+ 8. 编译所有版本
+ 9. 编译失败时,清理编译环境
+ 10. 单线程编译, 选择内核版本
+请选择对应序号,输入 1-10:
 ```
 
+选择 `10` 后可以选择单个内核或全部内核，编译时使用 `make -j1`。其他编译选项仍使用可用的全部线程。
+
+每次运行会在当前目录的 `logs/` 下新建日志文件，同时保留终端输出；日志文件记录脚本和构建命令的输出。
 
 可以根据自己需求选择内核版本，目前我使用的是 6.12 的内核，稳定运行半年以上了。
-
 
 ## 二、线上 github actions 编译
 
@@ -100,19 +87,17 @@ u01@debian-11:~$ ./build-openwrt.sh
 3. 等待一段时间后，回来可以看到编译好固件就生成了，下载下来执行后续步骤即可。
 
 
-
-线上编译默认版本是`6.12`，如果需要修改可以修改 `./.github/workflows/build.yaml` 如下内容：
+线上编译默认版本是`6.18`，如果需要修改可以修改 `./.github/workflows/build.yaml` 如下内容：
 
 ```
-KERNEL_VERSION: '6.12' # 可选内核版本 6.12 | 6.6 | 6.1 | 5.15 | 5.10 | 5.4
+KERNEL_VERSION: '6.18' # 可选内核版本 6.18 | 6.12 | 6.6 | 6.1 | 5.15 | 5.10 | 5.4
 ```
 
-对应配置文件 `x86_64.config` 可以根据自己需求修改.
-
+对应配置文件 `x86_64_nft.config` 可以根据自己需求修改.
 
 ## 三、编译后安装固件
 
-1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.12_xxx.zip`
+1. 编译后目标文件存在路径和脚本同目录如：`openwrt_6.18_xxx.zip`
 
 2. 解压后cd到`./openwrt/bin/targets/x86/64/`查看编译好的固件。
 
@@ -137,8 +122,6 @@ KERNEL_VERSION: '6.12' # 可选内核版本 6.12 | 6.6 | 6.1 | 5.15 | 5.10 | 5.4
     ```
 
 11. 接下来就可以愉快的上网冲浪了。
-
-
 
 ## 声明
 
